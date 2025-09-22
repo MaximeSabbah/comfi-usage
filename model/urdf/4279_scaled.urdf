@@ -29,7 +29,7 @@
     <visual>
       <origin xyz="0.000000 -0.050000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/pelvis_mesh.STL" scale="0.006300 0.005800 0.005800" />
+        <mesh filename="meshes/pelvis_mesh.STL" scale="0.006300 0.005800 0.005800" />
         </geometry>
       <material name="body_color" />
       </visual>
@@ -57,7 +57,7 @@
     <visual>
       <origin xyz="0.000000 -0.050000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/upperleg_mesh.STL" scale="0.006200 0.006400 0.006900" />
+        <mesh filename="meshes/upperleg_mesh.STL" scale="0.006200 0.006400 0.006900" />
         </geometry>
       <material name="body_color_L" />
       </visual>
@@ -71,14 +71,14 @@
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/lowerleg_mesh.STL" scale="0.006300 0.006600 0.007000" />
+        <mesh filename="meshes/lowerleg_mesh.STL" scale="0.006300 0.006600 0.007000" />
         </geometry>
       <material name="body_color_L" />
       </visual>
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/knee_mesh.STL" scale="0.005600 0.005600 0.005600" />
+        <mesh filename="meshes/knee_mesh.STL" scale="0.005600 0.005600 0.005600" />
         </geometry>
       <material name="body_color_L" />
       </visual>
@@ -99,7 +99,7 @@
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/foot_mesh.STL" scale="0.006700 0.006700 0.006700" />
+        <mesh filename="meshes/foot_mesh.STL" scale="0.006700 0.006700 0.006700" />
         </geometry>
       <material name="body_color_L" />
       </visual>
@@ -120,7 +120,7 @@
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/abdomen_mesh.STL" scale="0.007400 0.007400 0.007400" />
+        <mesh filename="meshes/abdomen_mesh.STL" scale="0.007400 0.007400 0.007400" />
         </geometry>
       <material name="body_color" />
       </visual>
@@ -148,7 +148,7 @@
     <visual>
       <origin xyz="0.000000 -0.188511 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/torso_mesh.STL" scale="0.007000 0.007000 0.007000" />
+        <mesh filename="meshes/torso_mesh.STL" scale="0.007000 0.007000 0.007000" />
         </geometry>
       <material name="body_color" />
       </visual>
@@ -183,14 +183,14 @@
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/shoulder_mesh.STL" scale="0.003900 0.003900 0.003900" />
+        <mesh filename="meshes/shoulder_mesh.STL" scale="0.003900 0.003900 0.003900" />
         </geometry>
       <material name="body_color_L" />
       </visual>
     <visual>
       <origin xyz="0.000000 0.050000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/upperarm_mesh.STL" scale="0.006300 0.006000 0.006900" />
+        <mesh filename="meshes/upperarm_mesh.STL" scale="0.006300 0.006000 0.006900" />
         </geometry>
       <material name="body_color_L" />
       </visual>
@@ -211,14 +211,14 @@
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/lowerarm_mesh.STL" scale="0.006400 0.006400 0.006400" />
+        <mesh filename="meshes/lowerarm_mesh.STL" scale="0.006400 0.006400 0.006400" />
         </geometry>
       <material name="body_color_L" />
       </visual>
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/elbow_mesh.STL" scale="0.005500 0.005500 0.005500" />
+        <mesh filename="meshes/elbow_mesh.STL" scale="0.005500 0.005500 0.005500" />
         </geometry>
       <material name="body_color_L" />
       </visual>
@@ -239,7 +239,7 @@
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/hand_mesh.STL" scale="0.006100 0.006100 0.006100" />
+        <mesh filename="meshes/hand_mesh.STL" scale="0.006100 0.006100 0.006100" />
         </geometry>
       <material name="body_color_L" />
       </visual>
@@ -267,14 +267,14 @@
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/head_mesh.STL" scale="0.005600 0.005600 0.005600" />
+        <mesh filename="meshes/head_mesh.STL" scale="0.005600 0.005600 0.005600" />
         </geometry>
       <material name="body_color" />
       </visual>
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/neck_mesh.STL" scale="0.005000 0.005000 0.005000" />
+        <mesh filename="meshes/neck_mesh.STL" scale="0.005000 0.005000 0.005000" />
         </geometry>
       <material name="body_color" />
       </visual>
@@ -309,14 +309,14 @@
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/shoulder_mesh.STL" scale="0.003900 0.003900 0.003900" />
+        <mesh filename="meshes/shoulder_mesh.STL" scale="0.003900 0.003900 0.003900" />
         </geometry>
       <material name="body_color_R" />
       </visual>
     <visual>
       <origin xyz="0.000000 0.050000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/upperarm_mesh.STL" scale="0.006300 0.006000 0.006900" />
+        <mesh filename="meshes/upperarm_mesh.STL" scale="0.006300 0.006000 0.006900" />
         </geometry>
       <material name="body_color_R" />
       </visual>
@@ -337,14 +337,14 @@
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/lowerarm_mesh.STL" scale="0.006400 0.006400 0.006400" />
+        <mesh filename="meshes/lowerarm_mesh.STL" scale="0.006400 0.006400 0.006400" />
         </geometry>
       <material name="body_color_R" />
       </visual>
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/elbow_mesh.STL" scale="0.005500 0.005500 0.005500" />
+        <mesh filename="meshes/elbow_mesh.STL" scale="0.005500 0.005500 0.005500" />
         </geometry>
       <material name="body_color_R" />
       </visual>
@@ -365,7 +365,7 @@
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/hand_mesh.STL" scale="0.006100 0.006100 0.006100" />
+        <mesh filename="meshes/hand_mesh.STL" scale="0.006100 0.006100 0.006100" />
         </geometry>
       <material name="body_color_R" />
       </visual>
@@ -393,7 +393,7 @@
     <visual>
       <origin xyz="0.000000 -0.050000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/upperleg_mesh.STL" scale="0.006200 0.006400 0.006900" />
+        <mesh filename="meshes/upperleg_mesh.STL" scale="0.006200 0.006400 0.006900" />
         </geometry>
       <material name="body_color_R" />
       </visual>
@@ -407,14 +407,14 @@
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/lowerleg_mesh.STL" scale="0.006300 0.006600 0.007000" />
+        <mesh filename="meshes/lowerleg_mesh.STL" scale="0.006300 0.006600 0.007000" />
         </geometry>
       <material name="body_color_R" />
       </visual>
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/knee_mesh.STL" scale="0.005600 0.005600 0.005600" />
+        <mesh filename="meshes/knee_mesh.STL" scale="0.005600 0.005600 0.005600" />
         </geometry>
       <material name="body_color_R" />
       </visual>
@@ -435,7 +435,7 @@
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
       <geometry>
-        <mesh filename="/root/workspace/ros_ws/src/rt-cosmik/meshes/foot_mesh.STL" scale="0.006700 0.006700 0.006700" />
+        <mesh filename="meshes/foot_mesh.STL" scale="0.006700 0.006700 0.006700" />
         </geometry>
       <material name="body_color_R" />
       </visual>
@@ -696,7 +696,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -710,7 +710,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -724,7 +724,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -738,7 +738,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -752,7 +752,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -766,7 +766,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -780,7 +780,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -794,7 +794,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -808,7 +808,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -822,7 +822,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -836,7 +836,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -850,7 +850,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -864,7 +864,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -878,7 +878,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -892,7 +892,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -906,7 +906,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -920,7 +920,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -934,7 +934,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -948,7 +948,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -962,7 +962,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -976,7 +976,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -990,7 +990,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1004,7 +1004,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1018,7 +1018,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1032,7 +1032,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1046,7 +1046,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1060,7 +1060,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1074,7 +1074,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1088,7 +1088,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1102,7 +1102,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1116,7 +1116,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1130,7 +1130,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1144,7 +1144,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1158,7 +1158,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1172,7 +1172,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1186,7 +1186,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1200,7 +1200,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1214,7 +1214,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1228,7 +1228,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1242,7 +1242,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1256,7 +1256,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1270,7 +1270,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1284,7 +1284,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1298,7 +1298,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1312,7 +1312,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01" />
+        <sphere radius="0.02" />
         </geometry>
       <material name="marker_color" />
       </visual>
@@ -1323,3 +1323,4 @@
     <origin xyz="0.147890 -0.035712 0.029119" rpy="0.000000 -0.000000 0.000000" />
     </joint>
   </robot>
+
