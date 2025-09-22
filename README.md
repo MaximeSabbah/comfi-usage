@@ -8,7 +8,7 @@ Scripts to use and showcase the data from the COMFI dataset
 ```bash
 git clone https://github.com/MaximeSabbah/comfi-usage.git
 cd comfi-usage
-
+```
 2. **Virtual environment**
 python3 -m venv comfi_env
 source comfi_env/bin/activate
