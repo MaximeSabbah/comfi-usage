@@ -16,11 +16,11 @@ from utils.viz_utils import add_sphere, place
 # === Load data ===
 subject = "Alessandro"
 task = "robot_welding"
-path_to_csv = f"./data/{subject}/mocap/{task}/joint_center_positions_test.csv"
+path_to_csv = f"./data/{subject}/res_hpe/{task}/3d_keypoints_4cams.csv"
 df = pd.read_csv(path_to_csv)
 
 
-mks_dict, start_sample_dict = read_mks_data(df, start_sample=0)
+mks_dict, start_sample_dict = read_mks_data(df, start_sample=0,converter=1.0)
 
 mks_names = start_sample_dict.keys()
 # === Initialize Meshcat Visualizer ===

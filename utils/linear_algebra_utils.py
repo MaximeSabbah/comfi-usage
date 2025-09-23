@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import signal
 
 
 def col_vector_3D(a, b, c):
@@ -28,3 +29,10 @@ def transform_to_global_frame(D, origin, rotation_matrix):
 
     D_global =  rotation_matrix @ D + origin
     return D_global
+
+def butterworth_filter(data, cutoff_frequency, order=5, sampling_frequency=60):
+    nyquist = 0.5 * sampling_frequency
+    if not 0 < cutoff_frequency < nyquist:
+        raise ValueError("Cutoff frequency must be between 0 and Nyquist frequency.")
+    b, a = signal.butter(order, cutoff_frequency / nyquist, btype='low', analog=False)
+    return signal.filtfilt(b, a, data, axis=0)

@@ -161,11 +161,11 @@ def main():
     paths = Paths(
         mks_csv = "./data/Alessandro/mocap/robot_welding/mocap_downsampled_to_40hz.csv",
         q_ref_csv = "./data/Alessandro/mocap/robot_welding/q_mocap.csv",
-        robot_csv = "./data/Alessandro/mocap/Alessandro_robot_welding.csv",
+        robot_csv = "./data/Alessandro/robot/Alessandro_robot_welding.csv",
         cam0_ts_csv = "./data/Alessandro/camera_0_timestamps.csv",
         urdf_path = "./model/urdf/4279_scaled.urdf",
         urdf_meshes_path =os.path.abspath("model"),
-        robot_base_yaml = "./data/Alessandro/mocap/robot_base_pose.yaml",
+        robot_base_yaml = "./data/Alessandro/robot/robot_base_pose.yaml",
         jcp_csv = "./data/Alessandro/mocap/robot_welding/joint_center_positions.csv",
         soder_paths = {
             "0": "./data/Alessandro/config/soder_0.txt",
