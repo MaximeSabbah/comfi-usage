@@ -25,4 +25,7 @@ pip install -r requirements.txt
 To visualise joint center position : python -m scripts.visualization.viz_jcp
 To visualise jcp and mocap markers : python -m scripts.visualization.viz_multiple_mks_set
 To visualise all data (include markers, joint angles, robot ..) : python -m scripts.visualization.viz_all_data
+To run human pose estimator using rtmlib : python scripts/human_pose_estimator/run_pose_estimator.py 
+ro tun triangulation using 2cameras or 4 cameras : python -m scripts.run_triangulation
+
 ```
