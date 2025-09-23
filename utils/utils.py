@@ -274,27 +274,25 @@ def transform_keypoints_list_cam0_to_mocap(keypoints_list, R_trans, d_trans):
 
     return transformed_list
 
-def load_force_data(csv_file_path):
-    
+def load_force_data(csv_file_path, max_pf=5):
     df = pd.read_csv(csv_file_path)
-    
-    # Organiser les données par capteur
     force_data = {}
-    
-    # Pour chaque capteur Sensix (1, 2, 3)
-    for sensor_id in [1, 2, 3]:
+
+    for sensor_id in range(1, max_pf + 1):
         sensor_name = f"Sensix_{sensor_id}"
-        
-        if f"{sensor_name}_Fx" in df.columns:
+
+        # Vérifie que toutes les colonnes de ce capteur existent
+        required_cols = [f"{sensor_name}_{axis}" for axis in ["Fx","Fy","Fz","Mx","My","Mz"]]
+        if all(col in df.columns for col in required_cols):
             force_data[sensor_id] = {
-                'frames': df['camera_frame'].values,
+                'frames': df['camera_frame'].values if 'camera_frame' in df.columns else None,
                 'Fx': df[f"{sensor_name}_Fx"].values,
-                'Fy': df[f"{sensor_name}_Fy"].values, 
+                'Fy': df[f"{sensor_name}_Fy"].values,
                 'Fz': df[f"{sensor_name}_Fz"].values,
                 'Mx': df[f"{sensor_name}_Mx"].values,
                 'My': df[f"{sensor_name}_My"].values,
                 'Mz': df[f"{sensor_name}_Mz"].values,
             }
-    
+
     return force_data
 

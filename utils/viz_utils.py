@@ -254,30 +254,23 @@ def display_force_meshcat(viz, phi, M_se3, name="arrow"):
     if length < 1e-6:
         return
     
-    # Direction de la force
     force_direction = force / np.linalg.norm(force)
     
-    # AJUSTEMENT : Position de départ au dessus de la plateforme
-    platform_thickness = 0.01  # Épaisseur de vos plateformes dans define_scene
+    platform_thickness = 0.01  
     start_position = M_se3.translation.copy()
-    start_position[2] += platform_thickness + 0.005  # Au dessus + petit offset
+    start_position[2] += platform_thickness + 0.005  
     
-    # Position du centre du cylindre (flèche)
     arrow_center = start_position + force_direction * length * 0.5
     
-    # Rotation
     meshcat_default_axis = np.array([0, 1, 0])
     Rot = rotation_matrix_from_vectors(meshcat_default_axis, force)
     
-    # Mise à jour de la position et rotation
     M_se3_temp.translation = arrow_center
     M_se3_temp.rotation = M_se3.rotation @ Rot
     
-    # Géométrie
     arrow_geom = g.Cylinder(length, radius)
     viz.viewer[name].set_object(arrow_geom, g.MeshLambertMaterial(color=color))
     
-    # Transformation
     transform = tf.compose_matrix(
         translate=M_se3_temp.translation,
         angles=tf.euler_from_matrix(M_se3_temp.rotation)

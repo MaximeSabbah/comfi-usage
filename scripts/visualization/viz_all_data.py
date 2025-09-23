@@ -230,7 +230,7 @@ def main():
     # transforms (robot base + cameras)
     T_world_robot = load_robot_base_pose(paths.robot_base_yaml)
     cameras = load_cameras_from_soder(paths.soder_paths)
-    force_data = load_force_data("/home/kchalabi/Documents/THESE/dataset/comfi-usage/data/Alessandro/pf/robot_welding/robot_welding_devices_aligned.csv")
+    force_data = load_force_data("./data/Alessandro/pf/robot_welding/robot_welding_devices_aligned.csv")
 
 
     # define the scene
@@ -253,7 +253,7 @@ def main():
         print("No time sync match found (even within tolerance).")
 
     #animation
-    animate(scene, mks_dict, mks_names, q_ref, q_robot, jcp, force_data,  # Nouveau paramètre
+    animate(scene, mks_dict, mks_names, q_ref, q_robot, jcp, force_data,  
         (fp_dims, fp_centers), sync, step=5, i0=0)
 
 if __name__ == "__main__":
