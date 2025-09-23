@@ -214,24 +214,88 @@ def draw_table(viz, T_world_table):
     for n, Tl in zip(leg_names, T_local_legs):
         set_tf(viz, n, T_world_table @ Tl)
 
+def make_visuals_gray(visual_model: pin.GeometryModel, rgba=(0.4, 0.4, 0.4, 0.7)):
+    for go in visual_model.geometryObjects:
+        go.overrideMaterial = True
+        go.meshColor = np.array([*rgba], dtype=float)
 
 
-def animate(scene,
-            mks_dict,
-            mks_names,
-            q_ref: np.ndarray,
-            q_robot: np.ndarray,
-            jcp: np.ndarray,
-            sync,
-            step: int = 5,
-            i0: int = 0):
-    # markers
-    # add_markers_to_meshcat(scene.viz_human.viewer, mks_dict, marker_names=mks_names, radius=0.025, default_color=0x2E86DE, opacity=0.95)
+def rotation_matrix_from_vectors(vec1, vec2):
+    """Find the rotation matrix that aligns vec1 to vec2
+    :param vec1: A 3d "source" vector
+    :param vec2: A 3d "destination" vector
+    :return mat: A transform matrix (3x3) which when applied to vec1, aligns it with
+    vec2.
+    """
+    a, b = (vec1 / np.linalg.norm(vec1)).reshape(3), (vec2 / np.linalg.norm(vec2)).reshape(3)
+    v = np.cross(a, b)
+    c = np.dot(a, b)
+    s = np.linalg.norm(v)
+    kmat = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+    rotation_matrix = np.eye(3) + kmat + kmat.dot(kmat) * ((1 - c) / (s**2))
+    return rotation_matrix
+
+
+def display_force_meshcat(viz, phi, M_se3, name="arrow"):
+    """
+    Version avec flèche partant du dessus de la plateforme
+    """
+    import meshcat.geometry as g
+    import meshcat.transformations as tf
+    
+    M_se3_temp = M_se3.copy()
+    color = 0xffff00
+    radius = 0.01
+    
+    phi_transformed = phi.se3Action(M_se3)
+    force = phi_transformed.linear
+    length = np.linalg.norm(force) * 1e-3
+    
+    if length < 1e-6:
+        return
+    
+    # Direction de la force
+    force_direction = force / np.linalg.norm(force)
+    
+    # AJUSTEMENT : Position de départ au dessus de la plateforme
+    platform_thickness = 0.01  # Épaisseur de vos plateformes dans define_scene
+    start_position = M_se3.translation.copy()
+    start_position[2] += platform_thickness + 0.005  # Au dessus + petit offset
+    
+    # Position du centre du cylindre (flèche)
+    arrow_center = start_position + force_direction * length * 0.5
+    
+    # Rotation
+    meshcat_default_axis = np.array([0, 1, 0])
+    Rot = rotation_matrix_from_vectors(meshcat_default_axis, force)
+    
+    # Mise à jour de la position et rotation
+    M_se3_temp.translation = arrow_center
+    M_se3_temp.rotation = M_se3.rotation @ Rot
+    
+    # Géométrie
+    arrow_geom = g.Cylinder(length, radius)
+    viz.viewer[name].set_object(arrow_geom, g.MeshLambertMaterial(color=color))
+    
+    # Transformation
+    transform = tf.compose_matrix(
+        translate=M_se3_temp.translation,
+        angles=tf.euler_from_matrix(M_se3_temp.rotation)
+    )
+    viz.viewer[name].set_transform(transform)
+
+def animate(scene, mks_dict, mks_names, q_ref, q_robot, jcp, 
+                           force_data, forceplates_dims_and_centers, sync,
+                           step=5, i0=0):
+
     unit_scale = 1.0
+    fp_dims, fp_centers = forceplates_dims_and_centers
+    
+    # Mapping capteurs -> plateformes
+    sensor_mapping = {1: 0, 2: 1, 3: 2} 
 
-    # loop
     for i in range(i0, len(q_ref), step):
-        # draw JCP spheres
+         # draw JCP spheres
         for j in range(jcp.shape[1]):
             sphere_name = f'jcp_mocap{j}'
             addViewerSphere(scene.viz_human, sphere_name, 0.025, [0, 1, 0, 1.0])
@@ -247,10 +311,63 @@ def animate(scene,
                 scene.viz_robot.display(q_robot[rr, :])
 
         scene.viz_human.display(q_ref[i, :])
+        
+        for sensor_id in force_data.keys():
+            arrow_name = f"force_sensor{sensor_id}"
+            scene.viz_robot.viewer[arrow_name].delete()
+        
+        for sensor_id, data in force_data.items():
+            if i < len(data['Fx']) and sensor_id in sensor_mapping:
+                plate_idx = sensor_mapping[sensor_id]
+                if plate_idx < len(fp_centers):
+                    # Données de la frame i
+                    fx = data['Fx'][i]
+                    fy = data['Fy'][i] 
+                    fz = -1*(data['Fz'][i])
+                    mx = data['Mx'][i]
+                    my = data['My'][i]
+                    mz = data['Mz'][i]
+                    
+                    if not np.any(np.isnan([fx, fy, fz])):
+                        phi = pin.Force(np.array([fx, fy, fz]), 
+                                      np.array([mx, my, mz]) * 1e-3)
+                        
+                        M_se3 = pin.SE3.Identity()
+                        M_se3.translation = np.array(fp_centers[plate_idx])
+                        M_se3.translation[2] += 0.02  
+                        
+                        display_force_meshcat(scene.viz_robot, phi, M_se3, 
+                                           f"force_sensor{sensor_id}")
 
 
-def make_visuals_gray(visual_model: pin.GeometryModel, rgba=(0.4, 0.4, 0.4, 0.7)):
-    for go in visual_model.geometryObjects:
-        go.overrideMaterial = True
-        go.meshColor = np.array([*rgba], dtype=float)
+# def animate(scene,
+#             mks_dict,
+#             mks_names,
+#             q_ref: np.ndarray,
+#             q_robot: np.ndarray,
+#             jcp: np.ndarray,
+#             sync,
+#             step: int = 5,
+#             i0: int = 0):
+#     # markers
+#     # add_markers_to_meshcat(scene.viz_human.viewer, mks_dict, marker_names=mks_names, radius=0.025, default_color=0x2E86DE, opacity=0.95)
+#     unit_scale = 1.0
 
+#     # loop
+#     for i in range(i0, len(q_ref), step):
+#         # draw JCP spheres
+#         for j in range(jcp.shape[1]):
+#             sphere_name = f'jcp_mocap{j}'
+#             addViewerSphere(scene.viz_human, sphere_name, 0.025, [0, 1, 0, 1.0])
+#             applyViewerConfiguration(scene.viz_human, sphere_name, np.hstack((jcp[i, j, :], np.array([0, 0, 0, 1]))))
+
+#         # set_markers_frame(scene.viz_human.viewer, mks_dict, i, marker_names=mks_names, unit_scale=unit_scale)
+
+#         if sync is not None:
+#             cam_idx = sync["cam_idx"]
+#             # robot frames exist in q_robot indices [0 .. len-1]
+#             rr = i - cam_idx
+#             if 0 <= rr < len(q_robot):
+#                 scene.viz_robot.display(q_robot[rr, :])
+
+#         scene.viz_human.display(q_ref[i, :])

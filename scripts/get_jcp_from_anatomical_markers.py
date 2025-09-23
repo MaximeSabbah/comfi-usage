@@ -4,7 +4,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import numpy as np
 from  utils.utils  import read_mks_data
 import pandas as pd
-from utils.utils import compute_joint_centers_from_mks
+from utils.urdf_utils import compute_joint_centers_from_mks
 
 subjects = [
     "Alessandro"

@@ -2,208 +2,8 @@ import os
 from typing import Dict, Any, List, Tuple, Optional
 import numpy as np
 import pandas as pd
-from .linear_algebra_utils import col_vector_3D, transform_to_global_frame,transform_to_local_frame
-from .model_utils import get_torso_pose, get_virtual_pelvis_pose, get_pelvis_pose
 import yaml
-
-
-def midpoint(p1, p2):
-    return 0.5 * (np.array(p1) + np.array(p2))
-
-def compute_hip_joint_center(L_ASIS, R_ASIS, L_PSIS, R_PSIS, knee_study, ankle_study, side="right"):
-    """
-    Compute hip joint center using Leardini et al. (1999) method.
-    
-    """
-    ASIS_mid = midpoint(R_ASIS, L_ASIS)
-    PSIS_mid = midpoint(R_PSIS, L_PSIS)
-
-    # Distance between ASIS and PSIS centers
-    pelvis_depth_vec = ASIS_mid - PSIS_mid
-    pelvis_depth = np.linalg.norm(pelvis_depth_vec)
-
-    # Distance between ASIS markers (pelvis width)
-    pelvis_width = np.linalg.norm(R_ASIS - L_ASIS)
-
-    ankle_knee_length = np.linalg.norm(ankle_study - knee_study)
-    knee_ASIS_length = np.linalg.norm(knee_study - (R_ASIS if side == "right" else L_ASIS))
-    vertical_adjust = ankle_knee_length + knee_ASIS_length
-
-    hip_y = ASIS_mid[1] - 0.096 * vertical_adjust
-    # Compute hip center
-    hip_x = ASIS_mid[0] - 0.31 * pelvis_depth
-    if side == "right":        
-        hip_z = ASIS_mid[2] + 0.38 * pelvis_width
-    elif side == "left":
-        hip_z = ASIS_mid[2] - 0.38 * pelvis_width
-    else:
-        raise ValueError("Side must be 'right' or 'left'")
-
-    return np.array([hip_x, hip_y, hip_z])
-
-def compute_uptrunk(C7, CLAV):
-    vec = CLAV - C7
-    norm = np.linalg.norm(vec)
-    angle_rad = 8 * np.pi / 180
-    return np.array([
-        C7[0] + np.cos(angle_rad) * 0.55 * norm,
-        C7[1] + np.sin(angle_rad) * 0.55 * norm,
-        C7[2]
-    ])
-
-def compute_shoulder(SHO, C7, CLAV, side='right'):
-    vec = CLAV - C7
-    norm = np.linalg.norm(vec)
-    angle_rad = 11 * np.pi / 180
-    sign = -1 if side == 'right' else -1  # both use minus sign in paper
-
-    return np.array([
-        SHO[0] + np.cos(angle_rad) * 0.43 * norm,
-        SHO[1] + sign * np.sin(angle_rad) * 0.43 * norm,
-        SHO[2]
-    ])
-
-
-def compute_joint_centers_from_mks(markers, *, gender="male"):
-    """
-    Compute joint center positions and segment lengths from marker positions.
-
-    Parameters
-    ----------
-    markers : dict[str, np.ndarray]
-        Dict of global marker positions. Each value should be shape (3,) or (3,1),
-        in either millimeters ("mm") or meters ("m") depending on `units`.
-    units : {"mm", "m"}, optional
-        Input units for `markers`. Used only for reporting lengths (meters).
-
-    Returns
-    -------
-    jcp_global : dict[str, np.ndarray]
-        Joint centers in GLOBAL frame, each as 1D array shape (3,) in input units.
-    segment_lengths : dict[str, float]
-        Upper/lower arm segment lengths in meters.
-    norms : dict[str, list[float]]
-        Elbow inter-epicondyle distances in meters. (Lists so you can append per-frame upstream.)
-    """
-    # --- helpers ---
-    def as_col(x):
-        x = np.asarray(x)
-        return x.reshape(3, 1) if x.shape != (3, 1) else x
-
-
-    jcp = {}
-    jcp_g = {}
-
-    # Pelvis pose (global)
-    pelvis_pose = get_virtual_pelvis_pose(markers)
-    pelvis_position = as_col(pelvis_pose[:3, 3])
-    pelvis_rotation = pelvis_pose[:3, :3]
-
-    bi_acromial_dist = np.linalg.norm(markers['L_shoulder_study'] - markers['r_shoulder_study'])
-    torso_pose = get_torso_pose(markers)
-
-    # ---- Transform all markers into pelvis (local) frame (do NOT mutate input) ----
-    markers_local = {}
-    for name, coords in markers.items():
-        coords_col = as_col(coords)
-        markers_local[name] = transform_to_local_frame(coords_col, pelvis_position, pelvis_rotation)
-
-    # ---- Shoulders & Neck ----
-    try:
-        jcp_g["RShoulder"]= markers['r_shoulder_study'].reshape(3,1) + (torso_pose[:3, :3].reshape(3,3)) @ col_vector_3D(0.0, -0.17*bi_acromial_dist, 0.0)
-        jcp_g["LShoulder"] = markers['L_shoulder_study'].reshape(3,1) + (torso_pose[:3, :3].reshape(3,3)) @ col_vector_3D(0.0, -0.17*bi_acromial_dist, 0.0)
-
-        jcp["RShoulder"] = transform_to_local_frame(jcp_g["RShoulder"], pelvis_position, pelvis_rotation)
-        jcp["LShoulder"] = transform_to_local_frame(jcp_g["LShoulder"], pelvis_position, pelvis_rotation)
-        jcp["Neck"] = compute_uptrunk(markers_local["C7_study"], markers_local["SJN"])
-    except KeyError as e:
-        pass
-
-    # ---- Elbows ----
-    try:
-        jcp["RElbow"] = midpoint(markers_local["r_melbow_study"], markers_local["r_lelbow_study"])
-        jcp["LElbow"] = midpoint(markers_local["L_melbow_study"], markers_local["L_lelbow_study"])
-
-    except KeyError:
-        pass
-
-    # ---- Wrists ----
-    try:
-        jcp["RWrist"] = midpoint(markers_local["r_mwrist_study"], markers_local["r_lwrist_study"])
-        jcp["LWrist"] = midpoint(markers_local["L_mwrist_study"], markers_local["L_lwrist_study"])
-    except KeyError:
-        pass
-
-    # ---- Pelvis & Hips ----
-    try:
-        R_ASIS = markers_local["r.ASIS_study"]
-        L_ASIS = markers_local["L.ASIS_study"]
-        R_PSIS = markers_local["r.PSIS_study"]
-        L_PSIS = markers_local["L.PSIS_study"]
-
-        jcp["RHip"] = compute_hip_joint_center(L_ASIS, R_ASIS, L_PSIS, R_PSIS,
-                                               markers_local["r_knee_study"],
-                                               markers_local["r_ankle_study"],
-                                               side="right")
-        jcp["LHip"] = compute_hip_joint_center(L_ASIS, R_ASIS, L_PSIS, R_PSIS,
-                                               markers_local["L_knee_study"],
-                                               markers_local["L_ankle_study"],
-                                               side="left")
-        jcp["midHip"] = midpoint(jcp["RHip"], jcp["LHip"])
-    except KeyError:
-        pass
-
-    # ---- Knees ----
-    try:
-        jcp["RKnee"] = midpoint(markers_local["r_mknee_study"], markers_local["r_knee_study"])
-        jcp["LKnee"] = midpoint(markers_local["L_mknee_study"], markers_local["L_knee_study"])
-    except KeyError:
-        pass
-
-    # ---- Ankles ----
-    try:
-        jcp["RAnkle"] = midpoint(markers_local["r_mankle_study"], markers_local["r_ankle_study"])
-        jcp["LAnkle"] = midpoint(markers_local["L_mankle_study"], markers_local["L_ankle_study"])
-    except KeyError:
-        pass
-
-    # ---- Feet / Toes ----
-    try:
-        jcp["RHeel"] = markers_local["r_calc_study"]
-        jcp["LHeel"] = markers_local["L_calc_study"]
-    except KeyError:
-        pass
-
-    try:
-        jcp["RBigToe"] = markers_local["r_toe_study"]
-        jcp["LBigToe"] = markers_local["L_toe_study"]
-    except KeyError:
-        pass
-
-    try:
-        jcp["RSmallToe"] = markers_local["r_5meta_study"]
-        jcp["LSmallToe"] = markers_local["L_5meta_study"]
-    except KeyError:
-        pass
-
-    # ---- Back to GLOBAL frame ----
-    jcp_global = {}
-    for name, coords in jcp.items():
-        coords_col = as_col(coords)
-        # Guard against accidental matrices (e.g., someone returns a 3x3)
-        if coords_col.shape != (3,1):
-            # try to coerce; if it fails, skip
-            try:
-                coords_col = np.asarray(coords).reshape(3,1)
-            except Exception:
-                print(f"⚠️ Skipping '{name}' – unexpected shape {np.asarray(coords).shape}")
-                continue
-        global_coords = transform_to_global_frame(coords_col, pelvis_position, pelvis_rotation)
-        jcp_global[name] = global_coords.flatten()
-
-
-    return jcp_global
-
+import pinocchio as pin
 
 def to_utc(s: pd.Series) -> pd.Series:
     return s.dt.tz_localize("UTC") if s.dt.tz is None else s.dt.tz_convert("UTC")
@@ -356,7 +156,7 @@ def load_robot_base_pose(yaml_path: str) -> np.ndarray:
 
 
 def load_all_data(paths, start_sample: int = 0, converter: float = 1000.0):
-    # mks mocap + names via your canonical reader
+    # mks mocap + names 
     mks_raw = pd.read_csv(paths.mks_csv)  # still funnel via try_read_mks next line
     mks_dict, start_sample_dict = try_read_mks(mks_raw, start_sample=start_sample, converter=converter)
     mks_names = list(start_sample_dict.keys())
@@ -473,3 +273,28 @@ def transform_keypoints_list_cam0_to_mocap(keypoints_list, R_trans, d_trans):
         transformed_list.append(p3d_mocap.flatten().tolist())
 
     return transformed_list
+
+def load_force_data(csv_file_path):
+    
+    df = pd.read_csv(csv_file_path)
+    
+    # Organiser les données par capteur
+    force_data = {}
+    
+    # Pour chaque capteur Sensix (1, 2, 3)
+    for sensor_id in [1, 2, 3]:
+        sensor_name = f"Sensix_{sensor_id}"
+        
+        if f"{sensor_name}_Fx" in df.columns:
+            force_data[sensor_id] = {
+                'frames': df['camera_frame'].values,
+                'Fx': df[f"{sensor_name}_Fx"].values,
+                'Fy': df[f"{sensor_name}_Fy"].values, 
+                'Fz': df[f"{sensor_name}_Fz"].values,
+                'Mx': df[f"{sensor_name}_Mx"].values,
+                'My': df[f"{sensor_name}_My"].values,
+                'Mz': df[f"{sensor_name}_Mz"].values,
+            }
+    
+    return force_data
+

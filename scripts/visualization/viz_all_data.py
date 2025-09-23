@@ -14,8 +14,7 @@ import meshcat_shapes
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../src')))
 from utils.urdf_utils import build_human_model, lock_joints, load_robot_panda
 from utils.viz_utils import box_between_frames, set_tf, draw_table, addViewerBox, make_visuals_gray, animate
-from example_robot_data import load
-from utils.utils import compute_time_sync,load_cameras_from_soder, load_robot_base_pose, load_all_data
+from utils.utils import compute_time_sync,load_cameras_from_soder, load_robot_base_pose, load_all_data,load_force_data
 
 @dataclass
 class Paths:
@@ -96,20 +95,55 @@ def define_scene(urdf_path: str,
     ]))
 
     # Force plates
+    R_frame = np.array([[0, -1, 0],
+                    [-1,  0, 0],
+                    [0,   0, -1]])
     fp_dim, fp_centers = forceplates_dims_and_centers
     for j, ((sx, sy), (cx, cy, cz)) in enumerate(zip(fp_dim, fp_centers), start=1):
-        name = f"force_plate_{j}"
+        name = f"fp{j}"
+        frame = f'R_fp{j}'
+        text_name  = f"fp{j}_text"
         addViewerBox(viz_robot, name, sx, sy, 0.01, rgba=[0.5, 0.5, 0.5, 1.0])
         T = np.eye(4)
         T[:3, 3] = [cx, cy, cz + 0.01/2.0]
         set_tf(viz_robot, name, T)
 
+        meshcat_shapes.frame(
+        viz_robot.viewer[frame],
+        axis_length=0.2,
+        axis_thickness=0.02,
+        opacity=0.8,
+        origin_radius=0.02
+        )
+        T_frame = np.eye(4)
+        T_frame[:3, :3] = R_frame
+        T_frame[:3, 3] = [cx, cy, cz + 0.03 ]
+        set_tf(viz_robot, frame, T_frame)
+
+        # 3) Label texte "fpj" décalé en XY et légèrement au-dessus
+        meshcat_shapes.textarea(viz_robot.viewer[text_name], f"fp{j}", font_size=32)
+        T_text = np.eye(4)
+        T_text[:3, 3] = [cx + 0.05, cy + 0.05, cz + 0.03]
+        set_tf(viz_robot, text_name, T_text)
+
     # Some frames and labels
     meshcat_shapes.textarea(viz_robot.viewer["R_world_text"], "R0", font_size=32)
+    T_name = np.eye(4)
+    T_name[0,3]+=0.15
+    T_name[1,3]+=0.15
+    T_name[2,3]+=0.15
+    set_tf(viz_robot,  "R_world_text", T_name)
     meshcat_shapes.frame(viz_robot.viewer["R_world"], axis_length=0.4, axis_thickness=0.04, opacity=1, origin_radius=0.02)
 
     meshcat_shapes.frame(viz_robot.viewer["R_robot"], axis_length=0.4, axis_thickness=0.02, opacity=1, origin_radius=0.02)
     set_tf(viz_robot, "R_robot", T_world_robot)
+    meshcat_shapes.textarea(viz_robot.viewer["Rrobot_text"], "Rrobot", font_size=28)
+    T_name = np.eye(4)
+    T_name[0:3,3]=T_world_robot[0:3,3]
+    T_name[0,3]+=0.25
+    T_name[1,3]-=0.25
+    T_name[2,3]+=0.025
+    set_tf(viz_robot,  "Rrobot_text", T_name)
 
     # Camera boxes + frames + links + text
     # Expect keys like "c0","c2","c4","c6"
@@ -127,6 +161,11 @@ def define_scene(urdf_path: str,
     safe_box_between("4","6","link_c4_c6")
 
     for k in cam_order:
+        T_cam=np.eye(4)
+        T_cam[0:3,0:3] =[[1,0,0],
+                            [0,0,-1],
+                            [0,1,0]] 
+
         Tck = cameras[k]
         meshcat_shapes.frame(viz_robot.viewer[cam_frame_name(k)], axis_length=0.2, axis_thickness=0.02, opacity=0.8, origin_radius=0.02)
         set_tf(viz_robot, cam_frame_name(k), Tck)
@@ -137,8 +176,9 @@ def define_scene(urdf_path: str,
         meshcat_shapes.textarea(viz_robot.viewer[cam_text_name(k)], f"cam{k}", font_size=28)
         Ttxt = np.array(Tck)
         Ttxt = Ttxt.copy()
-        Ttxt[2, 3] += 0.1
-        set_tf(viz_robot, cam_text_name(k), Ttxt)
+        T_cam[0:3,3]=Ttxt[0:3,3]
+        T_cam[2, 3] += 0.1
+        set_tf(viz_robot, cam_text_name(k), T_cam)
 
     # Table
     T_world_table = np.eye(4)
@@ -157,6 +197,8 @@ def define_scene(urdf_path: str,
 
 
 def main():
+
+
     #paths (adjust to your env)
     paths = Paths(
         mks_csv = "./data/Alessandro/mocap/robot_welding/mocap_downsampled_to_40hz.csv",
@@ -188,6 +230,8 @@ def main():
     # transforms (robot base + cameras)
     T_world_robot = load_robot_base_pose(paths.robot_base_yaml)
     cameras = load_cameras_from_soder(paths.soder_paths)
+    force_data = load_force_data("/home/kchalabi/Documents/THESE/dataset/comfi-usage/data/Alessandro/pf/robot_welding/robot_welding_devices_aligned.csv")
+
 
     # define the scene
     fp_dims = [(0.5,0.6), (0.50,0.60), (0.50,0.60), (0.9,1.8), (0.5,0.6)]
@@ -208,8 +252,9 @@ def main():
     else:
         print("No time sync match found (even within tolerance).")
 
-    #animattion
-    animate(scene, mks_dict, mks_names, q_ref, q_robot, jcp, sync, step=5, i0=0)
+    #animation
+    animate(scene, mks_dict, mks_names, q_ref, q_robot, jcp, force_data,  # Nouveau paramètre
+        (fp_dims, fp_centers), sync, step=5, i0=0)
 
 if __name__ == "__main__":
     main()
