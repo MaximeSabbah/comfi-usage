@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import yaml
 import pinocchio as pin
+import matplotlib.pyplot as plt
 
 def to_utc(s: pd.Series) -> pd.Series:
     return s.dt.tz_localize("UTC") if s.dt.tz is None else s.dt.tz_convert("UTC")
@@ -296,3 +297,73 @@ def load_force_data(csv_file_path, max_pf=5):
 
     return force_data
 
+def kabsch_global(P_cam_seq, P_mocap_seq, weights=None):
+    """
+    P_cam_seq, P_mocap_seq: arrays (T, N, 3) temporally and point-wise aligned.  
+    Computes a single (R, t) that aligns everything (cam -> mocap) by minimizing the sum of errors.
+
+    """
+
+    assert P_cam_seq.shape == P_mocap_seq.shape and P_cam_seq.shape[-1] == 3
+    T, N, _ = P_cam_seq.shape
+    X = P_cam_seq.reshape(T*N, 3)
+    Y = P_mocap_seq.reshape(T*N, 3)
+
+    if weights is not None:
+        w = np.asarray(weights).reshape(T, N)
+        w = w / (w.sum() + 1e-12)
+        w = w.reshape(T*N, 1)
+        Xc = (X * w).sum(axis=0)     # weighted means
+        Yc = (Y * w).sum(axis=0)
+        X0 = X - Xc
+        Y0 = Y - Yc
+        H = (Y0 * w).T @ X0
+    else:
+        Xc = X.mean(axis=0)
+        Yc = Y.mean(axis=0)
+        X0 = X - Xc
+        Y0 = Y - Yc
+        H = Y0.T @ X0
+
+    U, S, Vt = np.linalg.svd(H)
+    R = U @ Vt
+    if np.linalg.det(R) < 0:  # corrige réflexion
+        U[:, -1] *= -1
+        R = U @ Vt
+    t = Yc - R @ Xc
+
+    X_align = (R @ X.T).T + t
+    rms = np.sqrt(np.mean(np.sum((X_align - Y)**2, axis=1)))
+    return R, t, rms
+
+def plot_aligned_markers(P_mocap_seq, P_hpe_seq_aligned, marker_names):
+
+    if isinstance(P_hpe_seq_aligned, pd.DataFrame):
+        P_hpe_seq_aligned = P_hpe_seq_aligned.to_numpy().reshape(P_mocap_seq.shape)
+
+    T, N, _ = P_mocap_seq.shape
+    fig, axes = plt.subplots(N, 3, figsize=(12, 3*N), sharex=True)
+    if N == 1:  # cas spécial 1 marker
+        axes = axes.reshape(1, 3)
+
+    for i, mk in enumerate(marker_names):
+        for j, coord in enumerate(["x", "y", "z"]):
+            ax = axes[i, j]
+            ax.plot(P_mocap_seq[:, i, j], "r", label="mocap" if i==0 and j==0 else "")
+            ax.plot(P_hpe_seq_aligned[:, i, j], "g", label="hpe" if i==0 and j==0 else "")
+            ax.set_title(f"{mk} - {coord}")
+            if i == N-1:
+                ax.set_xlabel("Frame")
+    axes[0,0].legend()
+    plt.tight_layout()
+    plt.show()
+
+def compute_mpjpe(P_pred, P_gt):
+    """
+    P_pred, P_gt: arrays (T, N, 3)
+    Returns mean per-joint position error 
+    """
+    assert P_pred.shape == P_gt.shape
+    errors = np.linalg.norm(P_pred - P_gt, axis=2)  # (T,N) distance per joint per frame
+    mpjpe = errors.mean()                            # moyenne sur tous les joints et frames
+    return mpjpe
