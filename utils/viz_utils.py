@@ -244,7 +244,7 @@ def display_force_meshcat(viz, phi, M_se3, name="arrow"):
     import meshcat.transformations as tf
     
     M_se3_temp = M_se3.copy()
-    color = 0xffff00
+    color = 0x0000ff
     radius = 0.01
     
     phi_transformed = phi.se3Action(M_se3)
@@ -277,24 +277,31 @@ def display_force_meshcat(viz, phi, M_se3, name="arrow"):
     )
     viz.viewer[name].set_transform(transform)
 
-def animate(scene, mks_dict, mks_names, q_ref, q_robot, jcp, 
+def animate(scene, jcp, jcp_names, jcp_hpe,jcp_names_hpe,q_ref, q_robot, 
                            force_data, forceplates_dims_and_centers, sync,
                            step=5, i0=0):
 
     unit_scale = 1.0
+    viewer = scene.viewer
     fp_dims, fp_centers = forceplates_dims_and_centers
+    add_markers_to_meshcat(viewer, jcp, marker_names=jcp_names,
+                       radius=0.025, default_color=0xff0000, opacity=0.95)
+    
+    add_markers_to_meshcat(viewer, jcp_hpe, marker_names=jcp_names_hpe,
+                       radius=0.025, default_color=0x00ff00, opacity=0.95)
+
     
     # Mapping capteurs -> plateformes
     sensor_mapping = {1: 0, 2: 1, 3: 2} 
 
     for i in range(i0, len(q_ref), step):
          # draw JCP spheres
-        for j in range(jcp.shape[1]):
-            sphere_name = f'jcp_mocap{j}'
-            addViewerSphere(scene.viz_human, sphere_name, 0.025, [0, 1, 0, 1.0])
-            applyViewerConfiguration(scene.viz_human, sphere_name, np.hstack((jcp[i, j, :], np.array([0, 0, 0, 1]))))
+        set_markers_frame(viewer, jcp, i, marker_names=jcp_names, unit_scale=unit_scale)
 
-        # set_markers_frame(scene.viz_human.viewer, mks_dict, i, marker_names=mks_names, unit_scale=unit_scale)
+        jcp_hpe_renamed = []
+        for d in jcp_hpe:
+            jcp_hpe_renamed.append({k+"_hpe": v for k,v in d.items()})
+        set_markers_frame(viewer, jcp_hpe_renamed, i, marker_names=jcp_names_hpe, unit_scale=unit_scale)
 
         if sync is not None:
             cam_idx = sync["cam_idx"]

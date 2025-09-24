@@ -25,7 +25,8 @@ class Paths:
     urdf_path: str
     urdf_meshes_path: str
     robot_base_yaml: str
-    jcp_csv: str
+    jcp_mocap: str
+    jcp_hpe: str
     soder_paths: Dict[str, str] 
 
 @dataclass
@@ -184,7 +185,7 @@ def define_scene(urdf_path: str,
     T_world_table = np.eye(4)
     T_world_table[:3, 3] = [0.9, -0.6, 0.0]
     draw_table(viz_robot, T_world_table)
-
+    
     return Scene(
         viewer=viewer,
         viz_human=viz_human,
@@ -208,7 +209,8 @@ def main():
         urdf_path = "./model/urdf/4279_scaled.urdf",
         urdf_meshes_path =os.path.abspath("model"),
         robot_base_yaml = "./data/Alessandro/robot/robot_base_pose.yaml",
-        jcp_csv = "./data/Alessandro/mocap/robot_welding/joint_center_positions.csv",
+        jcp_mocap = "./data/Alessandro/mocap/robot_welding/joint_center_positions.csv",
+        jcp_hpe = "./data/Alessandro/res_hpe/robot_welding/3d_keypoints.csv",
         soder_paths = {
             "0": "./data/Alessandro/config/soder_0.txt",
             "2": "./data/Alessandro/config/soder_2.txt",
@@ -225,7 +227,10 @@ def main():
     q_robot = payload["q_robot"]
     t_cam = payload["t_cam"]
     t_robot = payload["t_robot"]
-    jcp = payload["jcp"]
+    jcp_mocap = payload["jcp_mocap"]
+    jcp_names = payload["jcp_names"]
+    jcp_hpe = payload["jcp_hpe"]
+    jcp_names_hpe = payload["jcp_names_hpe"]
 
     # transforms (robot base + cameras)
     T_world_robot = load_robot_base_pose(paths.robot_base_yaml)
@@ -244,6 +249,7 @@ def main():
         forceplates_dims_and_centers=(fp_dims, fp_centers),
         bg_top=(1,1,1), bg_bottom=(1,1,1), grid_height=-0.0
     )
+    
 
     #time syn between cameras and robot data
     sync = compute_time_sync(t_cam, t_robot, tol_ms=5)
@@ -253,7 +259,7 @@ def main():
         print("No time sync match found (even within tolerance).")
 
     #animation
-    animate(scene, mks_dict, mks_names, q_ref, q_robot, jcp, force_data,  
+    animate(scene, jcp_mocap, jcp_names,jcp_hpe,jcp_names_hpe, q_ref, q_robot, force_data,  
         (fp_dims, fp_centers), sync, step=5, i0=0)
 
 if __name__ == "__main__":

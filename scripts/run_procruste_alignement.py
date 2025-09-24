@@ -53,3 +53,12 @@ P_hpe_seq_aligned = (P_hpe_seq @ R.T) + t  # (T,N,3)
 plot_aligned_markers(P_mocap_seq, P_hpe_seq_aligned, common_mks)
 mpjpe = compute_mpjpe(P_hpe_seq_aligned, P_mocap_seq)
 print("MPJPE (m):", mpjpe)
+
+T, N, _ = P_hpe_seq_aligned.shape
+df_hpe_aligned = pd.DataFrame(P_hpe_seq_aligned.reshape(T, 3*N),
+                              columns=df_mocap.columns,
+                              index=df_mocap.index)
+
+output_csv = f"./data/{subject}/res_hpe/{task}/3d_keypoints_aligned.csv"
+df_hpe_aligned.to_csv(output_csv, index=False)
+print("Aligned HPE saved to:", output_csv)

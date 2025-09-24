@@ -183,22 +183,17 @@ def load_all_data(paths, start_sample: int = 0, converter: float = 1000.0):
         t_robot = pd.read_csv(paths.robot_csv, parse_dates=["timestamp"])
 
     # Joint Center Positions (JCP) from mocap
-    jcp_df = try_read_mks(paths.jcp_csv)
-    if not isinstance(jcp_df, pd.DataFrame):
-        jcp_df = pd.read_csv(paths.jcp_csv)
-    bases = []
-    for c in jcp_df.columns:
-        if "_" in c:
-            b, ax = c.rsplit("_", 1)
-            if ax.lower() in ("x", "y", "z") and b not in bases:
-                bases.append(b)
-    K = len(bases)
-    N = len(jcp_df)
-    jcp = np.empty((N, K, 3), dtype=float)
-    for k, b in enumerate(bases):
-        jcp[:, k, 0] = jcp_df[f"{b}_x"].to_numpy(dtype=float) / 1000.0
-        jcp[:, k, 1] = jcp_df[f"{b}_y"].to_numpy(dtype=float) / 1000.0
-        jcp[:, k, 2] = jcp_df[f"{b}_z"].to_numpy(dtype=float) / 1000.0
+    jcp_raw = pd.read_csv(paths.jcp_mocap) 
+    jcp_dict, start_sample_jcp_dict = try_read_mks(jcp_raw, start_sample=start_sample, converter=converter)
+    jcp_names = list(start_sample_jcp_dict.keys())
+
+    # Joint Center Positions (JCP) from hpe
+    jcp_raw_hpe = pd.read_csv(paths.jcp_hpe)  
+    jcp_dict_hpe, start_sample_jcp_dict_hpe = read_mks_data(jcp_raw_hpe, start_sample=start_sample, converter=1.0)
+    jcp_hpe = [start_sample_jcp_dict_hpe[name] for name in start_sample_jcp_dict_hpe.keys()]
+    jcp_names_hpe = [name + "_hpe" for name in start_sample_jcp_dict_hpe.keys()]
+
+  
 
     return {
         "mks_dict": mks_dict,
@@ -208,8 +203,10 @@ def load_all_data(paths, start_sample: int = 0, converter: float = 1000.0):
         "q_robot": q_robot,
         "t_cam": t_cam,
         "t_robot": t_robot,
-        "jcp": jcp,
-        "jcp_bases": bases
+        "jcp_mocap": jcp_dict,
+        "jcp_names": jcp_names,
+        "jcp_hpe": jcp_dict_hpe,
+        "jcp_names_hpe": jcp_names_hpe,
     }
 
 def compute_time_sync(t_cam: pd.DataFrame, t_robot: pd.DataFrame, tol_ms: int = 5):
