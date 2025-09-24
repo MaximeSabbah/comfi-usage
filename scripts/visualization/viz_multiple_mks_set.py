@@ -48,10 +48,14 @@ for name in jcp_mocap:
 
 # === Animate frame by frame ===
 for i in range(num_frames):
-    for name, mks_list in [(name, mks_list_1) for name in anatomical_mks] + \
-                          [(name, mks_list_2) for name in jcp_mocap]:
-        pos = mks_list[i][name].reshape(3,)
-        print(pos)
+    for name in anatomical_mks:
+        pos = mks_list_1[i][name].reshape(3,)
+        # print(pos)
         place(vis, name, pos)
         
-    #time.sleep(0.01)  # adjust playback speed
+    for name in jcp_mocap:
+        pos = mks_list_2[i][name].reshape(3,)
+        # print(pos)
+        place(vis, name, pos)
+        
+    # time.sleep(0.01)  # adjust playback speed

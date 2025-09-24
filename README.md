@@ -15,12 +15,12 @@ python3 -m venv comfi_env
 source comfi_env/bin/activate
 ```
 
-4. **Install dependencies**
+3. **Install dependencies**
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
-6. **Usage**
+4. **Usage**
 ```bash
 To visualise joint center position : python -m scripts.visualization.viz_jcp
 To visualise jcp and mocap markers : python -m scripts.visualization.viz_multiple_mks_set

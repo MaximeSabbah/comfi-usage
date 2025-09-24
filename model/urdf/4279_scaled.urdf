@@ -692,7 +692,7 @@
     <axis xyz="1.000000 0.000000 0.000000" />
     <limit effort="20.0" velocity="6.0" lower="-0.523598333" upper="0.785398" />
     </joint>
-  <link name="r.PSIS_study">
+  <link name="RPSI">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -701,12 +701,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_r.PSIS_study" type="fixed">
+  <joint name="joint_RPSI" type="fixed">
     <parent link="middle_pelvis" />
-    <child link="r.PSIS_study" />
+    <child link="RPSI" />
     <origin xyz="-0.090594 0.000607 0.050138" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="L.PSIS_study">
+  <link name="LPSI">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -715,12 +715,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_L.PSIS_study" type="fixed">
+  <joint name="joint_LPSI" type="fixed">
     <parent link="middle_pelvis" />
-    <child link="L.PSIS_study" />
+    <child link="LPSI" />
     <origin xyz="-0.093641 -0.000607 -0.050138" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="r.ASIS_study">
+  <link name="RASI">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -729,12 +729,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_r.ASIS_study" type="fixed">
+  <joint name="joint_RASI" type="fixed">
     <parent link="middle_pelvis" />
-    <child link="r.ASIS_study" />
+    <child link="RASI" />
     <origin xyz="0.089917 -0.000607 0.130778" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="L.ASIS_study">
+  <link name="LASI">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -743,24 +743,10 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_L.ASIS_study" type="fixed">
+  <joint name="joint_LASI" type="fixed">
     <parent link="middle_pelvis" />
-    <child link="L.ASIS_study" />
+    <child link="LASI" />
     <origin xyz="0.094319 0.000607 -0.130778" rpy="0.000000 -0.000000 0.000000" />
-    </joint>
-  <link name="C7_study">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <sphere radius="0.02" />
-        </geometry>
-      <material name="marker_color" />
-      </visual>
-    </link>
-  <joint name="joint_C7_study" type="fixed">
-    <parent link="middle_thorax" />
-    <child link="C7_study" />
-    <origin xyz="-0.118354 0.342507 -0.018198" rpy="0.000000 -0.000000 0.000000" />
     </joint>
   <link name="TV8">
     <visual>
@@ -818,6 +804,48 @@
     <child link="STRN" />
     <origin xyz="0.088753 0.093107 -0.015952" rpy="0.000000 -0.000000 0.000000" />
     </joint>
+  <link name="RSHO">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.02" />
+        </geometry>
+      <material name="marker_color" />
+      </visual>
+    </link>
+  <joint name="joint_RSHO" type="fixed">
+    <parent link="middle_head" />
+    <child link="RSHO" />
+    <origin xyz="0.023719 0.008590 0.170463" rpy="0.000000 -0.000000 0.000000" />
+    </joint>
+  <link name="LSHO">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.02" />
+        </geometry>
+      <material name="marker_color" />
+      </visual>
+    </link>
+  <joint name="joint_LSHO" type="fixed">
+    <parent link="middle_head" />
+    <child link="LSHO" />
+    <origin xyz="-0.023719 -0.008590 -0.170463" rpy="0.000000 -0.000000 0.000000" />
+    </joint>
+  <link name="C7">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.02" />
+        </geometry>
+      <material name="marker_color" />
+      </visual>
+    </link>
+  <joint name="joint_C7" type="fixed">
+    <parent link="middle_head" />
+    <child link="C7" />
+    <origin xyz="-0.065370 0.027860 0.011051" rpy="0.000000 -0.000000 0.000000" />
+    </joint>
   <link name="BHD">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -874,7 +902,7 @@
     <child link="FHD" />
     <origin xyz="0.074039 0.276017 0.001045" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="r_shoulder_study">
+  <link name="RMELB">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -883,40 +911,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_r_shoulder_study" type="fixed">
-    <parent link="right_clavicle" />
-    <child link="r_shoulder_study" />
-    <origin xyz="-0.013439 -0.005938 0.171692" rpy="0.000000 -0.000000 0.000000" />
-    </joint>
-  <link name="L_shoulder_study">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <sphere radius="0.02" />
-        </geometry>
-      <material name="marker_color" />
-      </visual>
-    </link>
-  <joint name="joint_L_shoulder_study" type="fixed">
-    <parent link="left_clavicle" />
-    <child link="L_shoulder_study" />
-    <origin xyz="0.013439 0.005938 -0.171692" rpy="0.000000 -0.000000 0.000000" />
-    </joint>
-  <link name="r_melbow_study">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <sphere radius="0.02" />
-        </geometry>
-      <material name="marker_color" />
-      </visual>
-    </link>
-  <joint name="joint_r_melbow_study" type="fixed">
+  <joint name="joint_RMELB" type="fixed">
     <parent link="right_upperarm" />
-    <child link="r_melbow_study" />
+    <child link="RMELB" />
     <origin xyz="0.000000 -0.323571 -0.040890" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="r_lelbow_study">
+  <link name="RELB">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -925,12 +925,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_r_lelbow_study" type="fixed">
+  <joint name="joint_RELB" type="fixed">
     <parent link="right_upperarm" />
-    <child link="r_lelbow_study" />
+    <child link="RELB" />
     <origin xyz="0.000000 -0.330543 0.040890" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="L_melbow_study">
+  <link name="LMELB">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -939,12 +939,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_L_melbow_study" type="fixed">
+  <joint name="joint_LMELB" type="fixed">
     <parent link="left_upperarm" />
-    <child link="L_melbow_study" />
+    <child link="LMELB" />
     <origin xyz="0.000000 -0.330346 0.041569" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="L_lelbow_study">
+  <link name="LELB">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -953,12 +953,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_L_lelbow_study" type="fixed">
+  <joint name="joint_LELB" type="fixed">
     <parent link="left_upperarm" />
-    <child link="L_lelbow_study" />
+    <child link="LELB" />
     <origin xyz="0.000000 -0.343948 -0.041569" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="r_lwrist_study">
+  <link name="RWRI">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -967,12 +967,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_r_lwrist_study" type="fixed">
+  <joint name="joint_RWRI" type="fixed">
     <parent link="right_lowerarm" />
-    <child link="r_lwrist_study" />
+    <child link="RWRI" />
     <origin xyz="0.000000 -0.287529 0.035149" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="r_mwrist_study">
+  <link name="RMWRI">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -981,12 +981,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_r_mwrist_study" type="fixed">
+  <joint name="joint_RMWRI" type="fixed">
     <parent link="right_lowerarm" />
-    <child link="r_mwrist_study" />
+    <child link="RMWRI" />
     <origin xyz="-0.000000 -0.271741 -0.035149" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="L_lwrist_study">
+  <link name="LWRI">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -995,12 +995,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_L_lwrist_study" type="fixed">
+  <joint name="joint_LWRI" type="fixed">
     <parent link="left_lowerarm" />
-    <child link="L_lwrist_study" />
+    <child link="LWRI" />
     <origin xyz="0.000000 -0.274757 -0.035605" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="L_mwrist_study">
+  <link name="LMWRI">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1009,12 +1009,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_L_mwrist_study" type="fixed">
+  <joint name="joint_LMWRI" type="fixed">
     <parent link="left_lowerarm" />
-    <child link="L_mwrist_study" />
+    <child link="LMWRI" />
     <origin xyz="0.000000 -0.268976 0.035605" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="RHL2">
+  <link name="RHM2">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1023,10 +1023,10 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_RHL2" type="fixed">
+  <joint name="joint_RHM2" type="fixed">
     <parent link="right_hand" />
-    <child link="RHL2" />
-    <origin xyz="0.000000 -0.091938 0.038828" rpy="0.000000 -0.000000 0.000000" />
+    <child link="RHM2" />
+    <origin xyz="0.000440 -0.097459 0.021487" rpy="0.000000 -0.000000 0.000000" />
     </joint>
   <link name="RHM5">
     <visual>
@@ -1040,9 +1040,9 @@
   <joint name="joint_RHM5" type="fixed">
     <parent link="right_hand" />
     <child link="RHM5" />
-    <origin xyz="0.000000 -0.080759 -0.038828" rpy="0.000000 -0.000000 0.000000" />
+    <origin xyz="0.021925 -0.071499 -0.049364" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="LHL2">
+  <link name="LHM2">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1051,10 +1051,10 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_LHL2" type="fixed">
+  <joint name="joint_LHM2" type="fixed">
     <parent link="left_hand" />
-    <child link="LHL2" />
-    <origin xyz="0.000000 -0.093099 -0.038498" rpy="0.000000 -0.000000 0.000000" />
+    <child link="LHM2" />
+    <origin xyz="-0.000973 -0.098845 0.019448" rpy="0.000000 -0.000000 0.000000" />
     </joint>
   <link name="LHM5">
     <visual>
@@ -1068,9 +1068,9 @@
   <joint name="joint_LHM5" type="fixed">
     <parent link="left_hand" />
     <child link="LHM5" />
-    <origin xyz="0.000000 -0.090499 0.038498" rpy="0.000000 -0.000000 0.000000" />
+    <origin xyz="-0.034621 -0.079150 -0.046998" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="r_knee_study">
+  <link name="RKNE">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1079,12 +1079,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_r_knee_study" type="fixed">
+  <joint name="joint_RKNE" type="fixed">
     <parent link="right_upperleg" />
-    <child link="r_knee_study" />
+    <child link="RKNE" />
     <origin xyz="-0.000000 -0.460758 0.061483" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="r_mknee_study">
+  <link name="RMKNE">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1093,12 +1093,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_r_mknee_study" type="fixed">
+  <joint name="joint_RMKNE" type="fixed">
     <parent link="right_upperleg" />
-    <child link="r_mknee_study" />
+    <child link="RMKNE" />
     <origin xyz="-0.000000 -0.472342 -0.061483" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="r_thigh1_study">
+  <link name="RTHI1">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1107,12 +1107,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_r_thigh1_study" type="fixed">
+  <joint name="joint_RTHI1" type="fixed">
     <parent link="right_upperleg" />
-    <child link="r_thigh1_study" />
+    <child link="RTHI1" />
     <origin xyz="0.045049 -0.171588 0.086006" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="L_knee_study">
+  <link name="LKNE">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1121,12 +1121,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_L_knee_study" type="fixed">
+  <joint name="joint_LKNE" type="fixed">
     <parent link="left_upperleg" />
-    <child link="L_knee_study" />
+    <child link="LKNE" />
     <origin xyz="-0.000000 -0.448815 -0.054917" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="L_mknee_study">
+  <link name="LMKNE">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1135,12 +1135,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_L_mknee_study" type="fixed">
+  <joint name="joint_LMKNE" type="fixed">
     <parent link="left_upperleg" />
-    <child link="L_mknee_study" />
+    <child link="LMKNE" />
     <origin xyz="-0.000000 -0.470743 0.054917" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="L_thigh1_study">
+  <link name="LTHI1">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1149,12 +1149,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_L_thigh1_study" type="fixed">
+  <joint name="joint_LTHI1" type="fixed">
     <parent link="left_upperleg" />
-    <child link="L_thigh1_study" />
+    <child link="LTHI1" />
     <origin xyz="0.007691 -0.328749 -0.077364" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="r_ankle_study">
+  <link name="RANK">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1163,12 +1163,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_r_ankle_study" type="fixed">
+  <joint name="joint_RANK" type="fixed">
     <parent link="right_lowerleg" />
-    <child link="r_ankle_study" />
+    <child link="RANK" />
     <origin xyz="-0.021648 -0.465412 0.041745" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="r_mankle_study">
+  <link name="RMANK">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1177,12 +1177,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_r_mankle_study" type="fixed">
+  <joint name="joint_RMANK" type="fixed">
     <parent link="right_lowerleg" />
-    <child link="r_mankle_study" />
+    <child link="RMANK" />
     <origin xyz="0.021648 -0.445036 -0.041745" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="r_sh1_study">
+  <link name="RTIB1">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1191,12 +1191,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_r_sh1_study" type="fixed">
+  <joint name="joint_RTIB1" type="fixed">
     <parent link="right_lowerleg" />
-    <child link="r_sh1_study" />
+    <child link="RTIB1" />
     <origin xyz="0.003438 -0.077598 0.063981" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="L_ankle_study">
+  <link name="LANK">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1205,12 +1205,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_L_ankle_study" type="fixed">
+  <joint name="joint_LANK" type="fixed">
     <parent link="left_lowerleg" />
-    <child link="L_ankle_study" />
+    <child link="LANK" />
     <origin xyz="-0.018587 -0.468709 -0.042247" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="L_mankle_study">
+  <link name="LMANK">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1219,12 +1219,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_L_mankle_study" type="fixed">
+  <joint name="joint_LMANK" type="fixed">
     <parent link="left_lowerleg" />
-    <child link="L_mankle_study" />
+    <child link="LMANK" />
     <origin xyz="0.018587 -0.448707 0.042247" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="L_sh1_study">
+  <link name="LTIB1">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1233,12 +1233,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_L_sh1_study" type="fixed">
+  <joint name="joint_LTIB1" type="fixed">
     <parent link="left_lowerleg" />
-    <child link="L_sh1_study" />
+    <child link="LTIB1" />
     <origin xyz="-0.012889 -0.276414 -0.060805" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="r_calc_study">
+  <link name="RHEE">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1247,12 +1247,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_r_calc_study" type="fixed">
+  <joint name="joint_RHEE" type="fixed">
     <parent link="right_foot" />
-    <child link="r_calc_study" />
+    <child link="RHEE" />
     <origin xyz="-0.060083 -0.036768 0.005484" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="r_5meta_study">
+  <link name="R5MHD">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1261,12 +1261,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_r_5meta_study" type="fixed">
+  <joint name="joint_R5MHD" type="fixed">
     <parent link="right_foot" />
-    <child link="r_5meta_study" />
+    <child link="R5MHD" />
     <origin xyz="0.129081 -0.040741 0.052061" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="r_toe_study">
+  <link name="RTOE">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1275,12 +1275,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_r_toe_study" type="fixed">
+  <joint name="joint_RTOE" type="fixed">
     <parent link="right_foot" />
-    <child link="r_toe_study" />
+    <child link="RTOE" />
     <origin xyz="0.158624 -0.032794 -0.041093" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="L_calc_study">
+  <link name="LHEE">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1289,12 +1289,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_L_calc_study" type="fixed">
+  <joint name="joint_LHEE" type="fixed">
     <parent link="left_foot" />
-    <child link="L_calc_study" />
+    <child link="LHEE" />
     <origin xyz="-0.064608 -0.040856 -0.015177" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="L_5meta_study">
+  <link name="L5MHD">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1303,12 +1303,12 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_L_5meta_study" type="fixed">
+  <joint name="joint_L5MHD" type="fixed">
     <parent link="left_foot" />
-    <child link="L_5meta_study" />
+    <child link="L5MHD" />
     <origin xyz="0.119161 -0.046000 -0.059472" rpy="0.000000 -0.000000 0.000000" />
     </joint>
-  <link name="L_toe_study">
+  <link name="LTOE">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -1317,10 +1317,9 @@
       <material name="marker_color" />
       </visual>
     </link>
-  <joint name="joint_L_toe_study" type="fixed">
+  <joint name="joint_LTOE" type="fixed">
     <parent link="left_foot" />
-    <child link="L_toe_study" />
+    <child link="LTOE" />
     <origin xyz="0.147890 -0.035712 0.029119" rpy="0.000000 -0.000000 0.000000" />
     </joint>
   </robot>
-

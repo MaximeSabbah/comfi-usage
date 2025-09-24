@@ -42,7 +42,7 @@ for name in mks_names:
 for i, frame in enumerate(mks_dict):
     for name in mks_names:
         pos = frame[name].reshape(3,)
-        print(pos)
+        # print(pos)
         place(vis, name, pos)
 
     # Uncomment for step-by-step with Enter
