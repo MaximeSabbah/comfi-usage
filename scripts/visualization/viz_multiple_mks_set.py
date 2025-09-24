@@ -31,31 +31,40 @@ df_1 = udp_csv_to_dataframe(csv_1_path, anatomical_mks) #float
 df_2 = pd.read_csv(csv_2_path)
 
 # === Convert to marker dicts using utils ===
-mks_list_1, _ = read_mks_data(df_1)
-mks_list_2, start_sample_dict = read_mks_data(df_2)
+mks_list_1, _ = read_mks_data(df_1, converter =1.0)
+mks_list_2, start_sample_dict = read_mks_data(df_2, converter =1.0)
 num_frames = min(len(mks_list_1), len(mks_list_2))
 jcp_mocap = start_sample_dict.keys()
 # === Initialize Meshcat visualizer ===
-vis = meshcat.Visualizer().open()
+viz = meshcat.Visualizer().open()
+viz["/Background"].set_property("top_color", [1.0, 1.0, 1.0])
+viz["/Background"].set_property("bottom_color", [1.0, 1.0, 1.0])
 
+# Optionnel : déplacer la grille
+viz["/Grid"].set_transform(np.array([
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, -0.0],
+    [0, 0, 0, 1]
+]))
 
 # Add spheres for both marker sets
 for name in anatomical_mks:
-    add_sphere(vis, f"world/{name}", radius=0.01, color=0xff0000)  # red
+    add_sphere(viz, f"world/{name}", radius=0.02, color=0xff0000)  # red
 
 for name in jcp_mocap:
-    add_sphere(vis, f"world/{name}", radius=0.01, color=0x0000ff)   #blue
+    add_sphere(viz, f"world/{name}", radius=0.02, color=0x0000ff)   #blue
 
 # === Animate frame by frame ===
 for i in range(num_frames):
     for name in anatomical_mks:
         pos = mks_list_1[i][name].reshape(3,)
         # print(pos)
-        place(vis, name, pos)
+        place(viz, name, pos)
         
     for name in jcp_mocap:
         pos = mks_list_2[i][name].reshape(3,)
         # print(pos)
-        place(vis, name, pos)
+        place(viz, name, pos)
         
     # time.sleep(0.01)  # adjust playback speed

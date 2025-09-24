@@ -16,16 +16,25 @@ from utils.viz_utils import add_sphere, place
 # === Load data ===
 subject = "Alessandro"
 task = "robot_welding"
-path_to_csv = f"./data/{subject}/mocap/{task}/joint_center_positions_test.csv"
+path_to_csv = f"./data/{subject}/mocap/{task}/mocap_downsampled_to_40hz.csv"
 df = pd.read_csv(path_to_csv)
 
 
-mks_dict, start_sample_dict = read_mks_data(df, start_sample=0)
+mks_dict, start_sample_dict = read_mks_data(df, start_sample=0, converter=1000.0)
 
 mks_names = start_sample_dict.keys()
 # === Initialize Meshcat Visualizer ===
-vis = meshcat.Visualizer().open()
+viz = meshcat.Visualizer().open()
+viz["/Background"].set_property("top_color", [1.0, 1.0, 1.0])
+viz["/Background"].set_property("bottom_color", [1.0, 1.0, 1.0])
 
+# Optionnel : déplacer la grille
+viz["/Grid"].set_transform(np.array([
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, -0.0],
+    [0, 0, 0, 1]
+]))
 
 # Create spheres for each marker
 
@@ -35,7 +44,7 @@ vis = meshcat.Visualizer().open()
 # 0xffff00  # yellow
 
 for name in mks_names:
-    add_sphere(vis, f"world/{name}", radius=0.01, color= 0xff0000)
+    add_sphere(viz, f"world/{name}", radius=0.02, color= 0xff0000)
 
 
 # === Animate frame by frame ===
@@ -43,7 +52,7 @@ for i, frame in enumerate(mks_dict):
     for name in mks_names:
         pos = frame[name].reshape(3,)
         # print(pos)
-        place(vis, name, pos)
+        place(viz, name, pos)
 
     # Uncomment for step-by-step with Enter
     # input(f"Frame {i+1}/{len(mks_dict)} - Press Enter")
