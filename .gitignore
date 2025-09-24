@@ -22,4 +22,28 @@ Thumbs.db
 
 
 data/
+COMFI/venv/
+ENV/
+env/
+comfi_env/
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+build/
+dist/
+*.egg-info/
+*.egg
+
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+.DS_Store
+Thumbs.db
+
+
+data/
 COMFI/
