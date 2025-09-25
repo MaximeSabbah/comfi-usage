@@ -371,18 +371,24 @@ def main():
     t_robot = payload["t_robot"]
     jcp_mocap = payload["jcp_mocap"]
     jcp_names = payload["jcp_names"]
-    jcp_hpe = payload["jcp_hpe"]
-    jcp_names_hpe = payload["jcp_names_hpe"]
 
     # transforms (robot base + cameras)
-    T_world_robot = load_robot_base_pose(paths.robot_base_yaml)
-    cameras = load_cameras_from_soder(paths.soder_paths)
-    force_data = load_force_data(paths.force_data)
+    if paths.robot_base_yaml is not None:
+        T_world_robot = load_robot_base_pose(paths.robot_base_yaml)
+    else : 
+        T_world_robot = None
 
+    cameras = load_cameras_from_soder(paths.soder_paths)
+
+    if paths.force_data is not None:
+        force_data = load_force_data(paths.force_data)
+    else : 
+        force_data = None 
 
     # define the scene
     fp_dims = [(0.5,0.6), (0.50,0.60), (0.50,0.60), (0.9,1.8), (0.5,0.6)]
     fp_centers = [(-0.830,-0.3,0.0), (-0.25,-0.3,0.0), (0.39,-0.3,0.0), (-1.68,-0.3,0.0), (-0.25,0.3,0.0)]
+    
     scene = define_scene(
         urdf_path=paths.urdf_path,
         urdf_meshes_path=paths.urdf_meshes_path,
@@ -392,7 +398,6 @@ def main():
         bg_top=(1,1,1), bg_bottom=(1,1,1), grid_height=-0.0
     )
     
-
     #time syn between cameras and robot data
     sync = compute_time_sync(t_cam, t_robot, tol_ms=5)
     if sync:

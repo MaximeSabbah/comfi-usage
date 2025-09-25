@@ -167,20 +167,28 @@ def load_all_data(paths, start_sample: int = 0, converter: float = 1000.0):
     q_ref = q_ref_df if isinstance(q_ref_df, np.ndarray) else pd.read_csv(paths.q_ref_csv).to_numpy(dtype=float)
 
     # Robot CSV 
-    robot_df = try_read_mks(paths.robot_csv, parse_dates=["_cam_time", "timestamp"])
-    if not isinstance(robot_df, pd.DataFrame):
-        robot_df = pd.read_csv(paths.robot_csv, parse_dates=["_cam_time", "timestamp"])
-    pos_cols = [f"position.panda_joint{i}" for i in range(1, 8)]
-    q_robot = robot_df[pos_cols].to_numpy(dtype=float)
-    q_robot = np.hstack([q_robot, np.zeros((q_robot.shape[0], 2), dtype=q_robot.dtype)])
+    if paths.robot_csv is not None:
+        robot_df = try_read_mks(paths.robot_csv, parse_dates=["_cam_time", "timestamp"])
+        if not isinstance(robot_df, pd.DataFrame):
+            robot_df = pd.read_csv(paths.robot_csv, parse_dates=["_cam_time", "timestamp"])
+        pos_cols = [f"panda_joint{i}_position[rad]" for i in range(1, 8)]
+        q_robot = robot_df[pos_cols].to_numpy(dtype=float)
+        q_robot = np.hstack([q_robot, np.zeros((q_robot.shape[0], 2), dtype=q_robot.dtype)])
+    else :
+        robot_df = None
+        q_robot = None
 
     # Camera timestamps + robot timestamps (time sync)
     t_cam = try_read_mks(paths.cam0_ts_csv, parse_dates=["timestamp"])
     if not isinstance(t_cam, pd.DataFrame):
         t_cam = pd.read_csv(paths.cam0_ts_csv, parse_dates=["timestamp"])
-    t_robot = try_read_mks(paths.robot_csv, parse_dates=["timestamp"])
-    if not isinstance(t_robot, pd.DataFrame):
-        t_robot = pd.read_csv(paths.robot_csv, parse_dates=["timestamp"])
+    
+    if paths.robot_csv is not None:
+        t_robot = try_read_mks(paths.robot_csv, parse_dates=["timestamp"])
+        if not isinstance(t_robot, pd.DataFrame):
+            t_robot = pd.read_csv(paths.robot_csv, parse_dates=["timestamp"])
+    else : 
+        t_robot = None
 
     # Joint Center Positions (JCP) from mocap
     jcp_raw = pd.read_csv(paths.jcp_mocap) 
@@ -188,12 +196,10 @@ def load_all_data(paths, start_sample: int = 0, converter: float = 1000.0):
     jcp_names = list(start_sample_jcp_dict.keys())
 
     # Joint Center Positions (JCP) from hpe
-    jcp_raw_hpe = pd.read_csv(paths.jcp_hpe)  
-    jcp_dict_hpe, start_sample_jcp_dict_hpe = read_mks_data(jcp_raw_hpe, start_sample=start_sample, converter=1.0)
-    jcp_hpe = [start_sample_jcp_dict_hpe[name] for name in start_sample_jcp_dict_hpe.keys()]
-    jcp_names_hpe = [name + "_hpe" for name in start_sample_jcp_dict_hpe.keys()]
-
-  
+    # jcp_raw_hpe = pd.read_csv(paths.jcp_hpe)  
+    # jcp_dict_hpe, start_sample_jcp_dict_hpe = read_mks_data(jcp_raw_hpe, start_sample=start_sample, converter=1.0)
+    # jcp_hpe = [start_sample_jcp_dict_hpe[name] for name in start_sample_jcp_dict_hpe.keys()]
+    # jcp_names_hpe = [name + "_hpe" for name in start_sample_jcp_dict_hpe.keys()]
 
     return {
         "mks_dict": mks_dict,
@@ -205,8 +211,8 @@ def load_all_data(paths, start_sample: int = 0, converter: float = 1000.0):
         "t_robot": t_robot,
         "jcp_mocap": jcp_dict,
         "jcp_names": jcp_names,
-        "jcp_hpe": jcp_dict_hpe,
-        "jcp_names_hpe": jcp_names_hpe,
+        # "jcp_hpe": jcp_dict_hpe,
+        # "jcp_names_hpe": jcp_names_hpe,
     }
 
 def compute_time_sync(t_cam: pd.DataFrame, t_robot: pd.DataFrame, tol_ms: int = 5):
