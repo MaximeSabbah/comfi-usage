@@ -343,7 +343,7 @@ def animate(scene, jcp, jcp_names, mks_dict, mks_names,q_ref, q_robot,
                             
                             display_force_meshcat(scene.viz_robot, phi, M_se3, 
                                             f"force_sensor{sensor_id}")
-        time.sleep(0.80*1/freq)
+        time.sleep(0.90*1/freq)
                             
     #     images.append(viewer.get_image())
 
