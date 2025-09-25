@@ -1,6 +1,7 @@
-import os
+#!/usr/bin/env python3
+import argparse
+from pathlib import Path
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from dataclasses import dataclass
 from typing import Dict, Any, List, Tuple, Optional
@@ -10,11 +11,29 @@ import pinocchio as pin
 from pinocchio.visualize import MeshcatVisualizer
 import meshcat
 import meshcat_shapes
+import time
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../src')))
+# ---- local imports (assuming this file is in scripts/ or similar) ----
+THIS_DIR = Path(__file__).resolve().parent
+PARENT_DIR = THIS_DIR.parent
+if str(PARENT_DIR) not in sys.path:
+    sys.path.append(str(PARENT_DIR))
+
 from utils.urdf_utils import build_human_model, lock_joints, load_robot_panda
 from utils.viz_utils import box_between_frames, set_tf, draw_table, addViewerBox, make_visuals_gray, animate
 from utils.utils import compute_time_sync,load_cameras_from_soder, load_robot_base_pose, load_all_data,load_force_data
+# ----------------------------------------------------------------------
+
+SUBJECT_IDS = [
+    "1012","1118","1508","1602","1847","2112","2198","2307","3361",
+    "4162","4216","4279","4509","4612","4665","4687","4801","4827"
+]
+DS_TASKS = [
+    "Screwing","ScrewingSat","Crouching","Picking","Hammering","HammeringSat","Jumping","Lifting",
+    "QuickLifting","Lower","SideOverhead", "FrontOverhead","RobotPolishing","RobotWelding",
+    "Polishing","PolishingSat","SitToStand","Squatting","Static","Upper","CircularWalking","StraightWalking",
+    "Welding","WeldingSat"
+]
 
 @dataclass
 class Paths:
@@ -38,6 +57,28 @@ class Scene:
     human_data: pin.Data
     robot_model: pin.Model
     robot_data: pin.Data
+
+def parse_args():
+    p = argparse.ArgumentParser(
+        description="Visualize COMFI joint_center_positions.csv in Meshcat."
+    )
+    p.add_argument("--id", dest="subject_id", required=True,
+                   help="ID (e.g., 1012)")
+    p.add_argument("--task", required=True,
+                   help="Task name (e.g., RobotWelding)")
+    p.add_argument("--comfi-root", required=True,
+                   help="Path to COMFI dataset root.")
+    p.add_argument("--freq", type=int, choices=[40, 100], required=True,
+                   help="Sampling frequency: 40 (aligned) or 100 (raw).")
+    p.add_argument("--mkset", choices=["meas","est"], default="meas",
+                   help="Markers type, groun truth measured or estimated by our modeling. Default: meas")
+    p.add_argument("--with_jcp", action='store_true', default=False,
+                   help="Possibility to display the joint center position as well. Default: False")
+    p.add_argument("--start", type=int, default=0,
+                   help="Start frame index (inclusive). Default: 0")
+    p.add_argument("--stop", type=int, default=None,
+                   help="Stop frame index (exclusive). Default: None (till end)")
+    return p.parse_args()
 
 
 def define_scene(urdf_path: str,
@@ -196,9 +237,8 @@ def define_scene(urdf_path: str,
         robot_data=data_r
     )
 
-
 def main():
-
+    args = parse_args()
 
     #paths (adjust to your env)
     paths = Paths(
