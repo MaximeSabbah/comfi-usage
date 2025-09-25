@@ -6,6 +6,7 @@ import os
 
 from dataclasses import dataclass
 from typing import Dict, Any, List, Tuple, Optional
+from xmlrpc.client import Boolean
 import pandas as pd
 import numpy as np
 import pinocchio as pin
@@ -38,6 +39,8 @@ DS_TASKS = [
 
 TASKS_WITHOUT_FP = ["CircularWalking", "StraightWalking", "SideOverhead", "FrontOverhead"]
 
+TASKS_WITH_TABLE = ["Screwing","ScrewingSat","Hammering","HammeringSat","RobotPolishing","RobotWelding","Polishing","PolishingSat","Welding","WeldingSat"]
+
 URDF_DIR_DEFAULT   = Path("model/urdf")   # contains files like 4279_scaled.urdf
 MESHES_DIR_DEFAULT = Path("model")        # root for visuals/collisions
 
@@ -61,6 +64,8 @@ class Paths:
 
     urdf_path: Path
     urdf_meshes_path: Path
+
+    bool_table: Boolean
 
     # Resolved, OPTIONAL (present only for Robot* tasks or when files exist)
     force_data: Path | None
@@ -147,6 +152,11 @@ class Paths:
             robot_csv = None
             robot_base = None
 
+        if task in TASKS_WITH_TABLE:
+            bool_table = True
+        else:
+            bool_table = False
+
         return cls(
             comfi_root=root,
             subject_id=str(subject_id),
@@ -159,6 +169,7 @@ class Paths:
             soder_paths=soder,
             urdf_path=urdf_path,
             urdf_meshes_path=meshes_dir,
+            bool_table=bool_table,
             force_data=force_data,
             robot_csv=robot_csv,
             robot_base_yaml=robot_base
@@ -195,6 +206,7 @@ def parse_args():
 
 def define_scene(urdf_path: str,
                  urdf_meshes_path: str,
+                 bool_table: Boolean,
                  T_world_robot: np.ndarray,
                  cameras: Dict[str, np.ndarray],
                  forceplates_dims_and_centers: Tuple[List[Tuple[float,float]], List[Tuple[float,float,float]]],
@@ -209,18 +221,18 @@ def define_scene(urdf_path: str,
     """
     # Human base
     model_h, coll_h, vis_h, _ = build_human_model(urdf_path, urdf_meshes_path)
+    data_h = model_h.createData()
+    
     # make visuals gray
     make_visuals_gray(vis_h)
 
     # Lock joints
-    joints_to_lock = [
-        "middle_thoracic_X", "middle_thoracic_Y", "middle_thoracic_Z",
-        "left_wrist_X", "left_wrist_Z", "right_wrist_X", "right_wrist_Z"
-    ]
-    model_h, coll_h, vis_h, data_h = lock_joints(model_h, coll_h, vis_h, joints_to_lock)
+    # joints_to_lock = [
+    #     "middle_thoracic_X", "middle_thoracic_Y", "middle_thoracic_Z",
+    #     "left_wrist_X", "left_wrist_Z", "right_wrist_X", "right_wrist_Z"
+    # ]
+    # model_h, coll_h, vis_h, data_h = lock_joints(model_h, coll_h, vis_h, joints_to_lock)
 
-    # Panda
-    model_r, coll_r, vis_r, data_r = load_robot_panda()
 
     # Shared Meshcat
     viewer = meshcat.Visualizer()
@@ -232,10 +244,18 @@ def define_scene(urdf_path: str,
     viz_human.loadViewerModel("ref")
     viz_human.display(pin.neutral(model_h))
 
-    viz_robot = MeshcatVisualizer(model_r, coll_r, vis_r)
-    viz_robot.initViewer(viewer)
-    viz_robot.loadViewerModel(rootNodeName="panda")
-    viz_robot.viewer["panda"].set_transform(T_world_robot)
+
+    if T_world_robot is not None:
+        # Panda
+        model_r, coll_r, vis_r, data_r = load_robot_panda()
+        viz_robot = MeshcatVisualizer(model_r, coll_r, vis_r)
+        viz_robot.initViewer(viewer)
+        viz_robot.loadViewerModel(rootNodeName="panda")
+        viz_robot.viewer["panda"].set_transform(T_world_robot)
+    else:
+        viz_robot = None
+        model_r = None
+        data_r = None
 
     # Background/grid
     native_viz = viz_human.viewer
@@ -257,13 +277,13 @@ def define_scene(urdf_path: str,
         name = f"fp{j}"
         frame = f'R_fp{j}'
         text_name  = f"fp{j}_text"
-        addViewerBox(viz_robot, name, sx, sy, 0.01, rgba=[0.5, 0.5, 0.5, 1.0])
+        addViewerBox(viz_human, name, sx, sy, 0.01, rgba=[0.5, 0.5, 0.5, 1.0])
         T = np.eye(4)
         T[:3, 3] = [cx, cy, cz + 0.01/2.0]
-        set_tf(viz_robot, name, T)
+        set_tf(viz_human, name, T)
 
         meshcat_shapes.frame(
-        viz_robot.viewer[frame],
+        viz_human.viewer[frame],
         axis_length=0.2,
         axis_thickness=0.02,
         opacity=0.8,
@@ -272,32 +292,33 @@ def define_scene(urdf_path: str,
         T_frame = np.eye(4)
         T_frame[:3, :3] = R_frame
         T_frame[:3, 3] = [cx, cy, cz + 0.03 ]
-        set_tf(viz_robot, frame, T_frame)
+        set_tf(viz_human, frame, T_frame)
 
         # 3) Label texte "fpj" décalé en XY et légèrement au-dessus
-        meshcat_shapes.textarea(viz_robot.viewer[text_name], f"fp{j}", font_size=32)
+        meshcat_shapes.textarea(viz_human.viewer[text_name], f"fp{j}", font_size=32)
         T_text = np.eye(4)
         T_text[:3, 3] = [cx + 0.05, cy + 0.05, cz + 0.03]
-        set_tf(viz_robot, text_name, T_text)
+        set_tf(viz_human, text_name, T_text)
 
     # Some frames and labels
-    meshcat_shapes.textarea(viz_robot.viewer["R_world_text"], "R0", font_size=32)
+    meshcat_shapes.textarea(viz_human.viewer["R_world_text"], "R0", font_size=32)
     T_name = np.eye(4)
     T_name[0,3]+=0.15
     T_name[1,3]+=0.15
     T_name[2,3]+=0.15
-    set_tf(viz_robot,  "R_world_text", T_name)
-    meshcat_shapes.frame(viz_robot.viewer["R_world"], axis_length=0.4, axis_thickness=0.04, opacity=1, origin_radius=0.02)
+    set_tf(viz_human,  "R_world_text", T_name)
+    meshcat_shapes.frame(viz_human.viewer["R_world"], axis_length=0.4, axis_thickness=0.04, opacity=1, origin_radius=0.02)
 
-    meshcat_shapes.frame(viz_robot.viewer["R_robot"], axis_length=0.4, axis_thickness=0.02, opacity=1, origin_radius=0.02)
-    set_tf(viz_robot, "R_robot", T_world_robot)
-    meshcat_shapes.textarea(viz_robot.viewer["Rrobot_text"], "Rrobot", font_size=28)
-    T_name = np.eye(4)
-    T_name[0:3,3]=T_world_robot[0:3,3]
-    T_name[0,3]+=0.25
-    T_name[1,3]-=0.25
-    T_name[2,3]+=0.025
-    set_tf(viz_robot,  "Rrobot_text", T_name)
+    if T_world_robot is not None:
+        meshcat_shapes.frame(viz_human.viewer["R_robot"], axis_length=0.4, axis_thickness=0.02, opacity=1, origin_radius=0.02)
+        set_tf(viz_human, "R_robot", T_world_robot)
+        meshcat_shapes.textarea(viz_human.viewer["Rrobot_text"], "Rrobot", font_size=28)
+        T_name = np.eye(4)
+        T_name[0:3,3]=T_world_robot[0:3,3]
+        T_name[0,3]+=0.25
+        T_name[1,3]-=0.25
+        T_name[2,3]+=0.025
+        set_tf(viz_human,  "Rrobot_text", T_name)
 
     # Camera boxes + frames + links + text
     # Expect keys like "c0","c2","c4","c6"
@@ -309,7 +330,7 @@ def define_scene(urdf_path: str,
     # optional: connect pairs with links if c0<->c2 and c4<->c6 exist
     def safe_box_between(a, b, name):
         if a in cameras and b in cameras:
-            box_between_frames(viz_robot, name, cameras[a], cameras[b], thickness=0.1, height=0.1, rgba=(0.01,0.01,0.01,0.9))
+            box_between_frames(viz_human, name, cameras[a], cameras[b], thickness=0.1, height=0.1, rgba=(0.01,0.01,0.01,0.9))
 
     safe_box_between("0","2","link_c0_c2")
     safe_box_between("4","6","link_c4_c6")
@@ -321,23 +342,24 @@ def define_scene(urdf_path: str,
                             [0,1,0]] 
 
         Tck = cameras[k]
-        meshcat_shapes.frame(viz_robot.viewer[cam_frame_name(k)], axis_length=0.2, axis_thickness=0.02, opacity=0.8, origin_radius=0.02)
-        set_tf(viz_robot, cam_frame_name(k), Tck)
+        meshcat_shapes.frame(viz_human.viewer[cam_frame_name(k)], axis_length=0.2, axis_thickness=0.02, opacity=0.8, origin_radius=0.02)
+        set_tf(viz_human, cam_frame_name(k), Tck)
 
-        addViewerBox(viz_robot, cam_box_name(k), 0.1, 0.1, 0.1, rgba=[0.01, 0.01, 0.01, 1.0])
-        set_tf(viz_robot, cam_box_name(k), Tck)
+        addViewerBox(viz_human, cam_box_name(k), 0.1, 0.1, 0.1, rgba=[0.01, 0.01, 0.01, 1.0])
+        set_tf(viz_human, cam_box_name(k), Tck)
 
-        meshcat_shapes.textarea(viz_robot.viewer[cam_text_name(k)], f"cam{k}", font_size=28)
+        meshcat_shapes.textarea(viz_human.viewer[cam_text_name(k)], f"cam{k}", font_size=28)
         Ttxt = np.array(Tck)
         Ttxt = Ttxt.copy()
         T_cam[0:3,3]=Ttxt[0:3,3]
         T_cam[2, 3] += 0.1
-        set_tf(viz_robot, cam_text_name(k), T_cam)
+        set_tf(viz_human, cam_text_name(k), T_cam)
 
     # Table
-    T_world_table = np.eye(4)
-    T_world_table[:3, 3] = [0.9, -0.6, 0.0]
-    draw_table(viz_robot, T_world_table)
+    if bool_table:
+        T_world_table = np.eye(4)
+        T_world_table[:3, 3] = [0.9, -0.6, 0.0]
+        draw_table(viz_human, T_world_table)
     
     return Scene(
         viewer=viewer,
@@ -392,6 +414,7 @@ def main():
     scene = define_scene(
         urdf_path=paths.urdf_path,
         urdf_meshes_path=paths.urdf_meshes_path,
+        bool_table=paths.bool_table,
         T_world_robot=T_world_robot,
         cameras=cameras,
         forceplates_dims_and_centers=(fp_dims, fp_centers),
@@ -406,7 +429,7 @@ def main():
         print("No time sync match found (even within tolerance).")
 
     #animation
-    animate(scene, jcp_mocap, jcp_names,jcp_hpe,jcp_names_hpe, q_ref, q_robot, force_data,  
+    animate(scene, jcp_mocap, jcp_names,mks_dict, mks_names, q_ref, q_robot, force_data,  
         (fp_dims, fp_centers), sync, step=5, i0=0)
 
 if __name__ == "__main__":
