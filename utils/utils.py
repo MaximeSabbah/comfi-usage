@@ -286,16 +286,16 @@ def load_force_data(csv_file_path, max_pf=5):
         sensor_name = f"Sensix_{sensor_id}"
 
         # Vérifie que toutes les colonnes de ce capteur existent
-        required_cols = [f"{sensor_name}_{axis}" for axis in ["Fx","Fy","Fz","Mx","My","Mz"]]
+        required_cols = [f"{sensor_name}_{axis}" for axis in ["Fx[N]","Fy[N]","Fz[N]","Mx[N.mm]","My[N.mm]","Mz[N.mm]"]]
         if all(col in df.columns for col in required_cols):
             force_data[sensor_id] = {
                 'frames': df['camera_frame'].values if 'camera_frame' in df.columns else None,
-                'Fx': df[f"{sensor_name}_Fx"].values,
-                'Fy': df[f"{sensor_name}_Fy"].values,
-                'Fz': df[f"{sensor_name}_Fz"].values,
-                'Mx': df[f"{sensor_name}_Mx"].values,
-                'My': df[f"{sensor_name}_My"].values,
-                'Mz': df[f"{sensor_name}_Mz"].values,
+                'Fx': df[f"{sensor_name}_Fx[N]"].values,
+                'Fy': df[f"{sensor_name}_Fy[N]"].values,
+                'Fz': df[f"{sensor_name}_Fz[N]"].values,
+                'Mx': df[f"{sensor_name}_Mx[N.mm]"].values,
+                'My': df[f"{sensor_name}_My[N.mm]"].values,
+                'Mz': df[f"{sensor_name}_Mz[N.mm]"].values,
             }
 
     return force_data

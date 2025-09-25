@@ -319,7 +319,7 @@ def animate(scene, jcp, jcp_names, mks_dict, mks_names,q_ref, q_robot,
         if force_data is not None:
             for sensor_id in force_data.keys():
                 arrow_name = f"force_sensor{sensor_id}"
-                scene.viz_robot.viewer[arrow_name].delete()
+                scene.viz_human.viewer[arrow_name].delete()
             
             for sensor_id, data in force_data.items():
                 if i < len(data['Fx']) and sensor_id in sensor_mapping:
@@ -341,7 +341,7 @@ def animate(scene, jcp, jcp_names, mks_dict, mks_names,q_ref, q_robot,
                             M_se3.translation = np.array(fp_centers[plate_idx])
                             M_se3.translation[2] += 0.02  
                             
-                            display_force_meshcat(scene.viz_robot, phi, M_se3, 
+                            display_force_meshcat(scene.viz_human, phi, M_se3, 
                                             f"force_sensor{sensor_id}")
         time.sleep(0.90*1/freq)
                             
