@@ -7,13 +7,14 @@ import meshcat
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.viz_utils import add_sphere, place
-from utils.utils import read_mks_data, udp_csv_to_dataframe
-
+from utils.viz_utils import add_markers_to_meshcat, set_markers_frame
+from utils.utils import read_mks_data
+from pinocchio.visualize import MeshcatVisualizer
+import imageio
 # === Paths & Marker Names ===
-subject = "Mohamed"
-task = "hitting_sat"
-csv_1_path = f"./data/{subject}/mocap/{task}/mks_data_gapfilled.csv"
+subject = "Alessandro"
+task = "robot_welding"
+csv_1_path = f"./data/{subject}/mocap/{task}/mocap_downsampled_to_40hz.csv"
 csv_2_path = f"./data/{subject}/mocap/{task}/joint_center_positions.csv"
 
 anatomical_mks = ['r.PSIS_study','L.PSIS_study','r.ASIS_study','L.ASIS_study',
@@ -27,44 +28,52 @@ anatomical_mks = ['r.PSIS_study','L.PSIS_study','r.ASIS_study','L.ASIS_study',
              'r_pelvis', 'l_pelvis']
 
 # === Load CSVs as pandas DataFrames ===
-df_1 = udp_csv_to_dataframe(csv_1_path, anatomical_mks) #float
+df_1 = pd.read_csv(csv_1_path)
 df_2 = pd.read_csv(csv_2_path)
 
 # === Convert to marker dicts using utils ===
-mks_list_1, _ = read_mks_data(df_1, converter =1.0)
-mks_list_2, start_sample_dict = read_mks_data(df_2, converter =1.0)
-num_frames = min(len(mks_list_1), len(mks_list_2))
-jcp_mocap = start_sample_dict.keys()
-# === Initialize Meshcat visualizer ===
-viz = meshcat.Visualizer().open()
-viz["/Background"].set_property("top_color", [1.0, 1.0, 1.0])
-viz["/Background"].set_property("bottom_color", [1.0, 1.0, 1.0])
+mks, start_sample_mks = read_mks_data(df_1, converter =1000.0)
+jcp, start_sample_jcp = read_mks_data(df_2, converter =1000.0)
+mks_names = list(start_sample_mks.keys())
+jcp_names = list(start_sample_jcp.keys())
 
-# Optionnel : déplacer la grille
-viz["/Grid"].set_transform(np.array([
+num_frames = min(len(mks), len(jcp))
+
+
+
+
+# === Initialize Meshcat Visualizer ===
+viewer = meshcat.Visualizer()
+viz = MeshcatVisualizer()
+viz.initViewer(viewer, open=True)
+viz.viewer.delete()  # clear if relaunch
+native_viz = viz.viewer
+native_viz["/Background"].set_property("top_color", list((1,1,1)))
+native_viz["/Background"].set_property("bottom_color", list((1,1,1)))
+native_viz["/Grid"].set_transform(np.array([
     [1, 0, 0, 0],
     [0, 1, 0, 0],
     [0, 0, 1, -0.0],
     [0, 0, 0, 1]
 ]))
 
-# Add spheres for both marker sets
-for name in anatomical_mks:
-    add_sphere(viz, f"world/{name}", radius=0.02, color=0xff0000)  # red
 
-for name in jcp_mocap:
-    add_sphere(viz, f"world/{name}", radius=0.02, color=0x0000ff)   #blue
+
+add_markers_to_meshcat(viewer, mks, marker_names=mks_names,
+                       radius=0.025, default_color=0xff0000, opacity=0.95)
+add_markers_to_meshcat(viewer, jcp, marker_names=jcp_names,
+                       radius=0.025, default_color=0x00ff00, opacity=0.95)
+
+
 
 # === Animate frame by frame ===
-for i in range(num_frames):
-    for name in anatomical_mks:
-        pos = mks_list_1[i][name].reshape(3,)
-        # print(pos)
-        place(viz, name, pos)
-        
-    for name in jcp_mocap:
-        pos = mks_list_2[i][name].reshape(3,)
-        # print(pos)
-        place(viz, name, pos)
+images=[]
+for i in range(len(mks)):
+         # draw JCP spheres
+    set_markers_frame(viewer, mks, i, marker_names=mks_names, unit_scale=1.0)
+    set_markers_frame(viewer, jcp, i, marker_names=jcp_names, unit_scale=1.0)
+#     images.append(viz.viewer.get_image())
+
+# imageio.mimsave("video.mp4", images, fps=40)
         
     # time.sleep(0.01)  # adjust playback speed

@@ -11,7 +11,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from utils.utils import read_mks_data
 from utils.utils import read_mks_data
-from utils.viz_utils import add_sphere, place
+from utils.viz_utils import add_markers_to_meshcat,set_markers_frame
+import imageio
+from pinocchio.visualize import MeshcatVisualizer
+
 
 # === Load data ===
 subject = "Alessandro"
@@ -22,41 +25,34 @@ df = pd.read_csv(path_to_csv)
 
 mks_dict, start_sample_dict = read_mks_data(df, start_sample=0, converter=1000.0)
 
-mks_names = start_sample_dict.keys()
 # === Initialize Meshcat Visualizer ===
-viz = meshcat.Visualizer().open()
-viz["/Background"].set_property("top_color", [1.0, 1.0, 1.0])
-viz["/Background"].set_property("bottom_color", [1.0, 1.0, 1.0])
-
-# Optionnel : déplacer la grille
-viz["/Grid"].set_transform(np.array([
+viewer = meshcat.Visualizer()
+viz = MeshcatVisualizer()
+viz.initViewer(viewer, open=True)
+viz.viewer.delete()  # clear if relaunch
+native_viz = viz.viewer
+native_viz["/Background"].set_property("top_color", list((1,1,1)))
+native_viz["/Background"].set_property("bottom_color", list((1,1,1)))
+native_viz["/Grid"].set_transform(np.array([
     [1, 0, 0, 0],
     [0, 1, 0, 0],
     [0, 0, 1, -0.0],
     [0, 0, 0, 1]
 ]))
 
-# Create spheres for each marker
+mks_names = list(start_sample_dict.keys())
 
+add_markers_to_meshcat(viewer, mks_dict, marker_names=mks_names,
+                       radius=0.025, default_color=0xff0000, opacity=0.95)
 # 0xff0000  # red
 # 0x00ff00  # green
 # 0x0000ff  # blue
 # 0xffff00  # yellow
+images=[]
+for i in range(len(mks_dict)):
+         # draw JCP spheres
+    set_markers_frame(viewer, mks_dict, i, marker_names=mks_names, unit_scale=1.0)
+#     images.append(viz.viewer.get_image())
 
-for name in mks_names:
-    add_sphere(viz, f"world/{name}", radius=0.02, color= 0xff0000)
-
-
-# === Animate frame by frame ===
-for i, frame in enumerate(mks_dict):
-    for name in mks_names:
-        pos = frame[name].reshape(3,)
-        # print(pos)
-        place(viz, name, pos)
-
-    # Uncomment for step-by-step with Enter
-    # input(f"Frame {i+1}/{len(mks_dict)} - Press Enter")
-
-    # Or add a small delay for smooth animation
-    time.sleep(0.01)
+# imageio.mimsave("video.mp4", images, fps=40)
 

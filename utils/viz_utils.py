@@ -3,7 +3,7 @@ import meshcat.transformations as tf
 import numpy as np
 import pinocchio as pin
 import meshcat
-
+import imageio
 def meshcat_material(r, g, b, a):
     material = meshcat.geometry.MeshPhongMaterial()
     material.color = int(r * 255) * 256 ** 2 + int(g * 255) * 256 + int(b * 255)
@@ -290,7 +290,7 @@ def animate(scene, jcp, jcp_names, jcp_hpe,jcp_names_hpe,q_ref, q_robot,
     add_markers_to_meshcat(viewer, jcp_hpe, marker_names=jcp_names_hpe,
                        radius=0.025, default_color=0x00ff00, opacity=0.95)
 
-    
+    images = []
     # Mapping capteurs -> plateformes
     sensor_mapping = {1: 0, 2: 1, 3: 2} 
 
@@ -338,6 +338,9 @@ def animate(scene, jcp, jcp_names, jcp_hpe,jcp_names_hpe,q_ref, q_robot,
                         
                         display_force_meshcat(scene.viz_robot, phi, M_se3, 
                                            f"force_sensor{sensor_id}")
+    #     images.append(viewer.get_image())
+
+    # imageio.mimsave("video.mp4", images, fps=40)
 
 
 # def animate(scene,
