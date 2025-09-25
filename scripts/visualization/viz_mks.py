@@ -42,6 +42,8 @@ def parse_args():
                    help="Sampling frequency: 40 (aligned) or 100 (raw).")
     p.add_argument("--mkset", choices=["meas","est"], default="meas",
                    help="Markers type, groun truth measured or estimated by our modeling. Default: meas")
+    p.add_argument("--with_jcp", action='store_true', default=False,
+                   help="Possibility to display the joint center position as well. Default: False")
     p.add_argument("--start", type=int, default=0,
                    help="Start frame index (inclusive). Default: 0")
     p.add_argument("--stop", type=int, default=None,
@@ -63,16 +65,29 @@ def main():
     marker_color = 0xff0000 if args.mkset == "meas" else 0x0000ff
 
     comfi_root = Path(args.comfi_root)
-    csv_path = comfi_root / "mocap" / split_folder / args.subject_id / args.task / filename
-    if not csv_path.exists():
+    mks_csv_path = comfi_root / "mocap" / split_folder / args.subject_id / args.task / filename
+    if args.with_jcp:
+        jcp_csv_path = comfi_root / "mocap" / split_folder / args.subject_id / args.task / "joint_center_positions.csv"
+        if not jcp_csv_path.exists():
+            raise FileNotFoundError(f"CSV not found for jcp for task {args.task} and id {args.id}")
+
+    if not mks_csv_path.exists():
         raise FileNotFoundError(f"CSV not found: the task {args.task} is not available for id {args.subject_id}")
 
-    # Load CSV
-    df = pd.read_csv(csv_path)
-    mks_dict, start_sample_dict = read_mks_data(df, start_sample=0, converter=1000.0)
-    mks_names = list(start_sample_dict.keys())
+    
+    # Load CSVs
+    mks_df = pd.read_csv(mks_csv_path)
+    mks_dict, mks_start_sample_dict = read_mks_data(mks_df, start_sample=0, converter=1000.0)
+    mks_names = list(mks_start_sample_dict.keys())
+
+    if args.with_jcp:
+        jcp_df = pd.read_csv(jcp_csv_path)
+        jcp_dict, jcp_start_sample_dict = read_mks_data(jcp_df, start_sample=0, converter=1000.0)
+        jcp_names = list(jcp_start_sample_dict.keys())
 
     # Frame range
+    if args.with_jcp:
+        assert(len(mks_dict)==len(jcp_dict))
     n = len(mks_dict)
     start = max(0, args.start)
     stop = n if args.stop is None else min(args.stop, n)
@@ -94,14 +109,19 @@ def main():
         [0, 0, 0, 1]
     ]))
 
+    if args.with_jcp:
+        add_markers_to_meshcat(viewer, jcp_dict, marker_names=jcp_names,
+                            radius=0.020, default_color=0x00FF00, opacity=0.95)
+
     add_markers_to_meshcat(viewer, mks_dict, marker_names=mks_names,
                         radius=0.025, default_color=marker_color, opacity=0.95)
 
-    
     # Animate
     for i in range(start, stop):
         set_markers_frame(viewer, mks_dict, i, marker_names=mks_names, unit_scale=1.0)
-        time.sleep(0.70*(1/args.freq))
+        if args.with_jcp:
+            set_markers_frame(viewer, jcp_dict, i, marker_names=jcp_names, unit_scale=1.0)
+        time.sleep(0.60*(1/args.freq))
 
     print(f"[OK] Visualized {stop - start} frames | ID {args.subject_id} | Task {args.task} | {args.freq} Hz")
     print(f"[SRC] {csv_path}")
