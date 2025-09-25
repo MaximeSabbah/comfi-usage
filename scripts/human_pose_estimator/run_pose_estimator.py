@@ -3,7 +3,7 @@ import numpy as np
 from rtmlib import Wholebody, draw_skeleton, Custom, PoseTracker
 from functools import partial
 import csv
-# Configuration
+
 cam_id = 6
 task = 'robot_welding'
 subject = 'Alessandro'
@@ -16,7 +16,6 @@ device = 'cpu'  # 'cpu', 'cuda'
 backend = 'onnxruntime'
 openpose_skeleton = False
 
-# Initialisation du modèle
 custom = partial(
     Custom,
     to_openpose=openpose_skeleton,
@@ -40,17 +39,15 @@ pose_tracker = PoseTracker(
     device=device
 )
 
-# Ouverture de la vidéo
 cap = cv2.VideoCapture(video_path)
 if not cap.isOpened():
     print("Erreur : Impossible d'ouvrir la vidéo.")
     exit()
 
-# Obtenir les infos de la vidéo pour créer l'output
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 frame_width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-fourcc = cv2.VideoWriter_fourcc(*'MJPG')  # ou 'MJPG', 'MP4V', etc.
+fourcc = cv2.VideoWriter_fourcc(*'MJPG')  # 'MJPG', 'MP4V', etc.
 out = cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height))
 
 frame_id = 0
@@ -102,9 +99,6 @@ with open(csv_output, mode='w', newline='') as f:
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 	
-# Nettoyage
 cap.release()
 out.release()
 cv2.destroyAllWindows()
-
-print(f"✅ Vidéo sauvegardée sous : {output_path}")

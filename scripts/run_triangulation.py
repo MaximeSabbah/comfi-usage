@@ -15,7 +15,6 @@ tasks = ["robot_welding"]
 subjects = ["Alessandro"]
 
 
-#Mathis
 num_keypoints=26 
 markers = [
         "Nose", "LEye", "REye", "LEar", "REar", 

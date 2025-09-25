@@ -40,8 +40,6 @@ jcp_names = list(start_sample_jcp.keys())
 num_frames = min(len(mks), len(jcp))
 
 
-
-
 # === Initialize Meshcat Visualizer ===
 viewer = meshcat.Visualizer()
 viz = MeshcatVisualizer()
