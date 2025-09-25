@@ -2,6 +2,7 @@
 import argparse
 from pathlib import Path
 import sys
+import os
 
 from dataclasses import dataclass
 from typing import Dict, Any, List, Tuple, Optional
@@ -35,18 +36,131 @@ DS_TASKS = [
     "Welding","WeldingSat"
 ]
 
-@dataclass
+TASKS_WITHOUT_FP = ["CircularWalking", "StraightWalking", "SideOverhead", "FrontOverhead"]
+
+URDF_DIR_DEFAULT   = Path("model/urdf")   # contains files like 4279_scaled.urdf
+MESHES_DIR_DEFAULT = Path("model")        # root for visuals/collisions
+
+def task_has_robot(task_name: str) -> bool:
+    return "robot" in task_name.replace("-", "_").lower()
+
+@dataclass(frozen=True)
 class Paths:
-    mks_csv: str
-    q_ref_csv: str
-    robot_csv: str
-    cam0_ts_csv: str
-    urdf_path: str
-    urdf_meshes_path: str
-    robot_base_yaml: str
-    jcp_mocap: str
-    jcp_hpe: str
-    soder_paths: Dict[str, str] 
+    # Core args
+    comfi_root: Path
+    subject_id: str
+    task: str        # normalized (e.g., "RobotWelding")
+    freq: int        # 40 or 100
+
+    # files you consume
+    mks_csv: Path
+    q_ref_csv: Path
+    cam0_ts_csv: Path
+    jcp_mocap: Path
+    soder_paths: Dict[str, Path]
+
+    urdf_path: Path
+    urdf_meshes_path: Path
+
+    # Resolved, OPTIONAL (present only for Robot* tasks or when files exist)
+    force_data: Path | None
+    robot_csv: Path | None
+    robot_base_yaml: Path | None
+
+    @property
+    def split(self) -> str:
+        return "aligned" if self.freq == 40 else "raw"
+
+    @classmethod
+    def from_args(
+        cls,
+        comfi_root: str | Path,
+        subject_id: str,
+        task: str,
+        freq: int,
+        urdf_dir: str | Path = URDF_DIR_DEFAULT,
+        meshes_dir: str | Path = MESHES_DIR_DEFAULT,
+        camera_ids=("0","2","4","6"),
+                ) -> "Paths":
+
+        root = Path(comfi_root).resolve()
+        split = "aligned" if (int(freq) == 40 or task_has_robot(task)) else "raw"
+
+        # REQUIRED CSVs 
+        mks_csv = root / "mocap" / split / subject_id / task / "markers_trajectories.csv"
+        if not mks_csv.exists():
+            raise FileNotFoundError(f"Missing MKS mocap {split} CSV: {mks_csv}")
+
+        q_ref_csv = root / "mocap" / split / subject_id / task / "joint_angles.csv"
+        if not q_ref_csv.exists():
+            raise FileNotFoundError(f"Missing joint angles mocap {split} CSV: {q_ref_csv}")
+
+        cam0_ts_csv = root / "videos" / subject_id / task / "camera_0_timestamps.csv"
+        if not cam0_ts_csv.exists():
+            raise FileNotFoundError(f"Missing camera 0 timestamps CSV: {cam0_ts_csv}")
+        
+        jcp_mocap = root / "mocap" / split / subject_id / task / "joint_center_positions.csv"
+        if not jcp_mocap.exists():
+            raise FileNotFoundError(f"Missing JCP mocap {split} CSV: {jcp_mocap}")
+
+        soder: Dict[str, Path] = {}
+        for cid in camera_ids:
+            cand = root / "cam_params" / subject_id / "extrinsics" / "cam_to_world" / f"camera_{cid}" / "soder.txt"
+            if cand.exists():
+                soder[cid] = cand.resolve()
+            else:
+                raise FileNotFoundError(f"Missing Soder camera {cid} file: {cand}")
+
+        # REQUIRED URDF & meshes, derived from subject id
+        urdf_dir = Path(urdf_dir).resolve()
+        meshes_dir = Path(meshes_dir).resolve()
+        urdf_path = urdf_dir / f"{subject_id}_scaled.urdf"
+        if not urdf_path.exists():
+            raise FileNotFoundError(
+                f"Missing URDF for subject {subject_id}: {urdf_path}\n"
+                f"(Edit URDF_DIR_DEFAULT / filename pattern if needed.)"
+            )
+        if not meshes_dir.exists():
+            raise FileNotFoundError(
+                f"Meshes directory not found: {meshes_dir}\n"
+                f"(Edit MESHES_DIR_DEFAULT if your repo differs.)"
+            )
+        
+        if task in TASKS_WITHOUT_FP:
+            force_data = None
+        else:
+            force_data = root / "forces" / split / subject_id / task / f"{subject_id}_{task}_devices_aligned.csv"
+            if not force_data.exists():
+                raise FileNotFoundError(f"Missing force plates CSV: {force_data}") 
+
+        # OPTIONAL robot assets (only for Robot* tasks)
+        if task_has_robot(task):
+            robot_csv = root / "robot" / split / subject_id / task / f"{subject_id}_{task}.csv"
+            if not robot_csv.exists():
+                raise FileNotFoundError(f"CSV not found for robot for task {task} and id {subject_id}: {robot_csv}")
+            robot_base = root / "robot" / "robot_in_world" / subject_id / "robot_base_pose.yaml"
+            if not robot_base.exists():
+                raise FileNotFoundError(f"YAML not found for robot base pose for id {subject_id}: {robot_base}")
+        else:
+            robot_csv = None
+            robot_base = None
+
+        return cls(
+            comfi_root=root,
+            subject_id=str(subject_id),
+            task=task,
+            freq=int(freq),
+            mks_csv=mks_csv,
+            q_ref_csv=q_ref_csv,
+            cam0_ts_csv=cam0_ts_csv,
+            jcp_mocap=jcp_mocap,
+            soder_paths=soder,
+            urdf_path=urdf_path,
+            urdf_meshes_path=meshes_dir,
+            force_data=force_data,
+            robot_csv=robot_csv,
+            robot_base_yaml=robot_base
+        )
 
 @dataclass
 class Scene:
@@ -70,10 +184,6 @@ def parse_args():
                    help="Path to COMFI dataset root.")
     p.add_argument("--freq", type=int, choices=[40, 100], required=True,
                    help="Sampling frequency: 40 (aligned) or 100 (raw).")
-    p.add_argument("--mkset", choices=["meas","est"], default="meas",
-                   help="Markers type, groun truth measured or estimated by our modeling. Default: meas")
-    p.add_argument("--with_jcp", action='store_true', default=False,
-                   help="Possibility to display the joint center position as well. Default: False")
     p.add_argument("--start", type=int, default=0,
                    help="Start frame index (inclusive). Default: 0")
     p.add_argument("--stop", type=int, default=None,
@@ -240,6 +350,18 @@ def define_scene(urdf_path: str,
 def main():
     args = parse_args()
 
+    # Minimal friendly validation
+    if args.subject_id not in SUBJECT_IDS:
+        raise ValueError(f"Unknown subject ID '{args.subject_id}'. Allowed: {', '.join(SUBJECT_IDS)}")
+    if args.task not in DS_TASKS:
+        raise ValueError(f"Unknown task '{args.task}'. "
+                         f"Allowed: {', '.join(DS_TASKS)}")
+
+    paths = Paths.from_args(args)
+
+    print(paths)
+    input()
+
     #paths (adjust to your env)
     paths = Paths(
         mks_csv = "./data/Alessandro/mocap/robot_welding/mocap_downsampled_to_40hz.csv",
@@ -251,6 +373,7 @@ def main():
         robot_base_yaml = "./data/Alessandro/robot/robot_base_pose.yaml",
         jcp_mocap = "./data/Alessandro/mocap/robot_welding/joint_center_positions.csv",
         jcp_hpe = "./data/Alessandro/res_hpe/robot_welding/3d_keypoints.csv",
+        force_data = "./data/Alessandro/pf/robot_welding/robot_welding_devices_aligned.csv",
         soder_paths = {
             "0": "./data/Alessandro/config/soder_0.txt",
             "2": "./data/Alessandro/config/soder_2.txt",
@@ -275,7 +398,7 @@ def main():
     # transforms (robot base + cameras)
     T_world_robot = load_robot_base_pose(paths.robot_base_yaml)
     cameras = load_cameras_from_soder(paths.soder_paths)
-    force_data = load_force_data("./data/Alessandro/pf/robot_welding/robot_welding_devices_aligned.csv")
+    force_data = load_force_data(paths.force_data)
 
 
     # define the scene
