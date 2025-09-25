@@ -61,3 +61,5 @@ typing_extensions==4.15.0
 tzdata==2025.2
 u-msgpack-python==2.8.0
 wcwidth==0.2.13
+imageio==2.37.0
+
