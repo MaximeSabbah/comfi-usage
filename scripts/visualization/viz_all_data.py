@@ -422,11 +422,15 @@ def main():
     )
     
     #time syn between cameras and robot data
-    sync = compute_time_sync(t_cam, t_robot, tol_ms=5)
-    if sync:
-        print("Synced at:", sync)
+    if t_robot is not None:
+        sync = compute_time_sync(t_cam, t_robot, tol_ms=5)
+        if sync:
+            print("Synced at:", sync)
+        else:
+            print("No time sync match found (even within tolerance).")
+            sync = None
     else:
-        print("No time sync match found (even within tolerance).")
+        sync = None
 
     #animation
     animate(scene, jcp_mocap, jcp_names,mks_dict, mks_names, q_ref, q_robot, force_data,  

@@ -277,7 +277,7 @@ def display_force_meshcat(viz, phi, M_se3, name="arrow"):
     )
     viz.viewer[name].set_transform(transform)
 
-def animate(scene, jcp, jcp_names, jcp_hpe,jcp_names_hpe,q_ref, q_robot, 
+def animate(scene, jcp, jcp_names, mks_dict, mks_names,q_ref, q_robot, 
                            force_data, forceplates_dims_and_centers, sync,
                            step=5, i0=0):
 
@@ -285,10 +285,10 @@ def animate(scene, jcp, jcp_names, jcp_hpe,jcp_names_hpe,q_ref, q_robot,
     viewer = scene.viewer
     fp_dims, fp_centers = forceplates_dims_and_centers
     add_markers_to_meshcat(viewer, jcp, marker_names=jcp_names,
+                       radius=0.020, default_color=0x00FF00, opacity=0.95)
+
+    add_markers_to_meshcat(viewer, mks_dict, marker_names=mks_names,
                        radius=0.025, default_color=0xff0000, opacity=0.95)
-    
-    add_markers_to_meshcat(viewer, jcp_hpe, marker_names=jcp_names_hpe,
-                       radius=0.025, default_color=0x00ff00, opacity=0.95)
 
     images = []
     # Mapping capteurs -> plateformes
@@ -298,10 +298,12 @@ def animate(scene, jcp, jcp_names, jcp_hpe,jcp_names_hpe,q_ref, q_robot,
          # draw JCP spheres
         set_markers_frame(viewer, jcp, i, marker_names=jcp_names, unit_scale=unit_scale)
 
-        jcp_hpe_renamed = []
-        for d in jcp_hpe:
-            jcp_hpe_renamed.append({k+"_hpe": v for k,v in d.items()})
-        set_markers_frame(viewer, jcp_hpe_renamed, i, marker_names=jcp_names_hpe, unit_scale=unit_scale)
+        set_markers_frame(viewer, mks_dict, i, marker_names=mks_names, unit_scale=unit_scale)
+        
+        # jcp_hpe_renamed = []
+        # for d in jcp_hpe:
+        #     jcp_hpe_renamed.append({k+"_hpe": v for k,v in d.items()})
+        # set_markers_frame(viewer, jcp_hpe_renamed, i, marker_names=jcp_names_hpe, unit_scale=unit_scale)
 
         if sync is not None:
             cam_idx = sync["cam_idx"]
@@ -311,33 +313,35 @@ def animate(scene, jcp, jcp_names, jcp_hpe,jcp_names_hpe,q_ref, q_robot,
                 scene.viz_robot.display(q_robot[rr, :])
 
         scene.viz_human.display(q_ref[i, :])
-        
-        for sensor_id in force_data.keys():
-            arrow_name = f"force_sensor{sensor_id}"
-            scene.viz_robot.viewer[arrow_name].delete()
-        
-        for sensor_id, data in force_data.items():
-            if i < len(data['Fx']) and sensor_id in sensor_mapping:
-                plate_idx = sensor_mapping[sensor_id]
-                if plate_idx < len(fp_centers):
-                    # Données de la frame i
-                    fx = data['Fx'][i]
-                    fy = data['Fy'][i] 
-                    fz = -1*(data['Fz'][i])
-                    mx = data['Mx'][i]
-                    my = data['My'][i]
-                    mz = data['Mz'][i]
-                    
-                    if not np.any(np.isnan([fx, fy, fz])):
-                        phi = pin.Force(np.array([fx, fy, fz]), 
-                                      np.array([mx, my, mz]) * 1e-3)
+
+        if force_data is not None:
+            for sensor_id in force_data.keys():
+                arrow_name = f"force_sensor{sensor_id}"
+                scene.viz_robot.viewer[arrow_name].delete()
+            
+            for sensor_id, data in force_data.items():
+                if i < len(data['Fx']) and sensor_id in sensor_mapping:
+                    plate_idx = sensor_mapping[sensor_id]
+                    if plate_idx < len(fp_centers):
+                        # Données de la frame i
+                        fx = data['Fx'][i]
+                        fy = data['Fy'][i] 
+                        fz = -1*(data['Fz'][i])
+                        mx = data['Mx'][i]
+                        my = data['My'][i]
+                        mz = data['Mz'][i]
                         
-                        M_se3 = pin.SE3.Identity()
-                        M_se3.translation = np.array(fp_centers[plate_idx])
-                        M_se3.translation[2] += 0.02  
-                        
-                        display_force_meshcat(scene.viz_robot, phi, M_se3, 
-                                           f"force_sensor{sensor_id}")
+                        if not np.any(np.isnan([fx, fy, fz])):
+                            phi = pin.Force(np.array([fx, fy, fz]), 
+                                        np.array([mx, my, mz]) * 1e-3)
+                            
+                            M_se3 = pin.SE3.Identity()
+                            M_se3.translation = np.array(fp_centers[plate_idx])
+                            M_se3.translation[2] += 0.02  
+                            
+                            display_force_meshcat(scene.viz_robot, phi, M_se3, 
+                                            f"force_sensor{sensor_id}")
+                            
     #     images.append(viewer.get_image())
 
     # imageio.mimsave("video.mp4", images, fps=40)
