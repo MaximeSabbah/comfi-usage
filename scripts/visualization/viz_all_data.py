@@ -84,6 +84,8 @@ class Paths:
                 ) -> "Paths":
 
         root = Path(comfi_root).resolve()
+        if int(freq)==100 and task_has_robot(task):
+            print("[WARNING] 100Hz data for robot not available, fallback to 40Hz")
         split = "aligned" if (int(freq) == 40 or task_has_robot(task)) else "raw"
 
         # REQUIRED CSVs 
@@ -129,13 +131,13 @@ class Paths:
         if task in TASKS_WITHOUT_FP:
             force_data = None
         else:
-            force_data = root / "forces" / split / subject_id / task / f"{subject_id}_{task}_devices_aligned.csv"
+            force_data = root / "forces" / split / subject_id / task / f"{task}_devices.csv"
             if not force_data.exists():
                 raise FileNotFoundError(f"Missing force plates CSV: {force_data}") 
 
         # OPTIONAL robot assets (only for Robot* tasks)
         if task_has_robot(task):
-            robot_csv = root / "robot" / split / subject_id / task / f"{subject_id}_{task}.csv"
+            robot_csv = root / "robot" / split / subject_id / f"{subject_id}_{task}.csv"
             if not robot_csv.exists():
                 raise FileNotFoundError(f"CSV not found for robot for task {task} and id {subject_id}: {robot_csv}")
             robot_base = root / "robot" / "robot_in_world" / subject_id / "robot_base_pose.yaml"
@@ -357,30 +359,7 @@ def main():
         raise ValueError(f"Unknown task '{args.task}'. "
                          f"Allowed: {', '.join(DS_TASKS)}")
 
-    paths = Paths.from_args(args)
-
-    print(paths)
-    input()
-
-    #paths (adjust to your env)
-    paths = Paths(
-        mks_csv = "./data/Alessandro/mocap/robot_welding/mocap_downsampled_to_40hz.csv",
-        q_ref_csv = "./data/Alessandro/mocap/robot_welding/q_mocap.csv",
-        robot_csv = "./data/Alessandro/robot/Alessandro_robot_welding.csv",
-        cam0_ts_csv = "./data/Alessandro/camera_0_timestamps.csv",
-        urdf_path = "./model/urdf/4279_scaled.urdf",
-        urdf_meshes_path =os.path.abspath("model"),
-        robot_base_yaml = "./data/Alessandro/robot/robot_base_pose.yaml",
-        jcp_mocap = "./data/Alessandro/mocap/robot_welding/joint_center_positions.csv",
-        jcp_hpe = "./data/Alessandro/res_hpe/robot_welding/3d_keypoints.csv",
-        force_data = "./data/Alessandro/pf/robot_welding/robot_welding_devices_aligned.csv",
-        soder_paths = {
-            "0": "./data/Alessandro/config/soder_0.txt",
-            "2": "./data/Alessandro/config/soder_2.txt",
-            "4": "./data/Alessandro/config/soder_4.txt",
-            "6": "./data/Alessandro/config/soder_6.txt",
-        }
-    )
+    paths = Paths.from_args(args.comfi_root, args.subject_id, args.task, args.freq)
 
     #read all data
     payload = load_all_data(paths, start_sample=0, converter=1000.0)
@@ -427,3 +406,24 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+ # #paths (adjust to your env)
+    # paths = Paths(
+    #     mks_csv = "./data/Alessandro/mocap/robot_welding/mocap_downsampled_to_40hz.csv",
+    #     q_ref_csv = "./data/Alessandro/mocap/robot_welding/q_mocap.csv",
+    #     robot_csv = "./data/Alessandro/robot/Alessandro_robot_welding.csv",
+    #     cam0_ts_csv = "./data/Alessandro/camera_0_timestamps.csv",
+    #     urdf_path = "./model/urdf/4279_scaled.urdf",
+    #     urdf_meshes_path =os.path.abspath("model"),
+    #     robot_base_yaml = "./data/Alessandro/robot/robot_base_pose.yaml",
+    #     jcp_mocap = "./data/Alessandro/mocap/robot_welding/joint_center_positions.csv",
+    #     jcp_hpe = "./data/Alessandro/res_hpe/robot_welding/3d_keypoints.csv",
+    #     force_data = "./data/Alessandro/pf/robot_welding/robot_welding_devices_aligned.csv",
+    #     soder_paths = {
+    #         "0": "./data/Alessandro/config/soder_0.txt",
+    #         "2": "./data/Alessandro/config/soder_2.txt",
+    #         "4": "./data/Alessandro/config/soder_4.txt",
+    #         "6": "./data/Alessandro/config/soder_6.txt",
+    #     }
+    # )
