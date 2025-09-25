@@ -4,6 +4,8 @@ import numpy as np
 import pinocchio as pin
 import meshcat
 import imageio
+import time 
+
 def meshcat_material(r, g, b, a):
     material = meshcat.geometry.MeshPhongMaterial()
     material.color = int(r * 255) * 256 ** 2 + int(g * 255) * 256 + int(b * 255)
@@ -278,7 +280,7 @@ def display_force_meshcat(viz, phi, M_se3, name="arrow"):
     viz.viewer[name].set_transform(transform)
 
 def animate(scene, jcp, jcp_names, mks_dict, mks_names,q_ref, q_robot, 
-                           force_data, forceplates_dims_and_centers, sync,
+                           force_data, forceplates_dims_and_centers, sync, freq,
                            step=5, i0=0):
 
     unit_scale = 1.0
@@ -341,6 +343,7 @@ def animate(scene, jcp, jcp_names, mks_dict, mks_names,q_ref, q_robot,
                             
                             display_force_meshcat(scene.viz_robot, phi, M_se3, 
                                             f"force_sensor{sensor_id}")
+        time.sleep(0.80*1/freq)
                             
     #     images.append(viewer.get_image())
 

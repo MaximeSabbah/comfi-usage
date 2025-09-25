@@ -54,6 +54,7 @@ class Paths:
     subject_id: str
     task: str        # normalized (e.g., "RobotWelding")
     freq: int        # 40 or 100
+    freq_anim:str
 
     # files you consume
     mks_csv: Path
@@ -87,10 +88,13 @@ class Paths:
         meshes_dir: str | Path = MESHES_DIR_DEFAULT,
         camera_ids=("0","2","4","6"),
                 ) -> "Paths":
-
+        
         root = Path(comfi_root).resolve()
+
+        freq_anim = freq
         if int(freq)==100 and task_has_robot(task):
             print("[WARNING] 100Hz data for robot not available, fallback to 40Hz")
+            freq_anim = 40
         split = "aligned" if (int(freq) == 40 or task_has_robot(task)) else "raw"
 
         # REQUIRED CSVs 
@@ -162,6 +166,7 @@ class Paths:
             subject_id=str(subject_id),
             task=task,
             freq=int(freq),
+            freq_anim=int(freq_anim),
             mks_csv=mks_csv,
             q_ref_csv=q_ref_csv,
             cam0_ts_csv=cam0_ts_csv,
@@ -434,7 +439,7 @@ def main():
 
     #animation
     animate(scene, jcp_mocap, jcp_names,mks_dict, mks_names, q_ref, q_robot, force_data,  
-        (fp_dims, fp_centers), sync, step=5, i0=0)
+        (fp_dims, fp_centers), sync, paths.freq_anim, step=5, i0=0)
 
 if __name__ == "__main__":
     main()
