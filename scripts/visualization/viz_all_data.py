@@ -192,7 +192,7 @@ class Scene:
 
 def parse_args():
     p = argparse.ArgumentParser(
-        description="Visualize COMFI joint_center_positions.csv in Meshcat."
+        description="Visualize COMFI multimodal data (mocap, forces, robot) in Meshcat."
     )
     p.add_argument("--id", dest="subject_id", required=True,
                    help="ID (e.g., 1012)")

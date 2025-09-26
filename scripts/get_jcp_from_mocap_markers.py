@@ -26,7 +26,7 @@ DS_TASKS = [
 
 def parse_args():
     p = argparse.ArgumentParser(
-        description="Visualize/compute COMFI joint_center_positions.csv in Meshcat."
+        description="Compute the joint center positions from markers_trajectories.csv or markers_model_trajectories.csv and store the result in file for reuse."
     )
     # Allow multiple IDs / tasks (space-separated)
     p.add_argument("--id", dest="subject_ids", nargs="+", required=True,
@@ -89,7 +89,7 @@ def process_one(comfi_root: Path, split_folder: str, subject_id: str, task: str,
 
     jcp_df = pd.DataFrame(jcp_rows)
 
-    out_dir = Path(f"output/{split_folder}/{subject_id}/{task}").resolve()
+    out_dir = Path(f"output/mocap/{split_folder}/{subject_id}/{task}").resolve()
     os.makedirs(out_dir, exist_ok=True)
     out_csv = out_dir / f"joint_center_positions_{mkset}.csv"
 
