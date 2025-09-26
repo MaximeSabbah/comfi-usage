@@ -3,7 +3,8 @@ import numpy as np
 import os  
 import cv2 as cv
 import yaml
-
+from utils.utils import load_transformation
+import pinocchio as pin 
 
 def rt_to_homogeneous(R, T):
     """Convert (R, T) to a 4x4 homogeneous transformation matrix."""
@@ -197,7 +198,7 @@ def load_cam_pose_rpy(filename):
     return euler, translation_vector
 
 
-def load_camera_parameters(config_path, camera_ids=None):
+def load_camera_parameters(intrinsics_dir, extrinsics_dir, camera_ids):
     """
     Load intrinsic and extrinsic camera parameters for multiple cameras.
     
@@ -210,26 +211,30 @@ def load_camera_parameters(config_path, camera_ids=None):
     Returns:
         Camera parameters object from get_camera_params()
     """
-    # Default to 2-camera setup if not specified
-    if camera_ids is None:
-        camera_ids = [0, 2]
-    
+
     # Load intrinsic parameters for all cameras
     Ks = []
     Ds = []
     for cam_id in camera_ids:
-        K, D = load_cam_params(os.path.join(config_path, f"c{cam_id}_params_color.yaml"))
+        K, D = load_cam_params(os.path.join(intrinsics_dir, f"camera_{cam_id}_intrinsics.yaml"))
         Ks.append(K)
         Ds.append(D)
     
     # Load extrinsic parameters (transformations from camera 0 to other cameras)
     Rs = [None]  # First camera (reference) has no rotation
     Ts = [None]  # First camera (reference) has no translation
-    
+
+    R_first, T_first, _, _ = load_transformation(os.path.join(extrinsics_dir,f"cam_to_world/camera_{camera_ids[0]}/soder.txt"))
+    SE3_first = pin.SE3(R_first,T_first)
+
     for i, cam_id in enumerate(camera_ids[1:], 1):  # Skip first camera (reference)
-        R, T = load_cam_to_cam_params(os.path.join(config_path, f"c0_to_c{cam_id}_params_color.yaml"))
-        Rs.append(R)
-        Ts.append(T)
+        R, T, _, _ = load_transformation(os.path.join(extrinsics_dir,f"cam_to_world/camera_{cam_id}/soder.txt"))
+        SE3 = pin.SE3(R,T)
+        SE3_rel = SE3_first.inverse()*SE3
+        R_rel = SE3_rel.rotation
+        T_rel = SE3_rel.translation
+        Rs.append(R_rel)
+        Ts.append(T_rel)
     
     return get_camera_params(Ks=Ks, Ds=Ds, Rs=Rs, Ts=Ts)
 

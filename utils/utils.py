@@ -272,7 +272,7 @@ def transform_keypoints_list_cam0_to_mocap(keypoints_list, R_trans, d_trans):
         # Convert to shape (N, 3)
         p3d_cam0 = np.array(flat_coords).reshape(-1, 3)  # (N, 3)
         # Apply transformation
-        p3d_mocap = (R_trans @ p3d_cam0.T).T + d_trans  # (N, 3)
+        p3d_mocap = ((R_trans @ p3d_cam0.T).T + d_trans)*1000  # conversion to mm,  (N, 3)
         # Flatten again
         transformed_list.append(p3d_mocap.flatten().tolist())
 
