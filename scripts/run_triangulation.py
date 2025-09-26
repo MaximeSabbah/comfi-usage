@@ -3,7 +3,6 @@ import argparse
 from pathlib import Path
 import sys
 import numpy as np
-import os
 
 # ---- local imports (assuming this file is in scripts/ or similar) ----
 THIS_DIR = Path(__file__).resolve().parent
@@ -140,7 +139,7 @@ def process_one(comfi_root: Path, sid: str, task: str, cam_ids: list[int]) -> bo
 def main():
     args = parse_args()
     validate_lists(args.subject_ids, args.tasks)
-    comfi_root = Path(args.comfi_root).expanduser().resolve()
+    comfi_root = Path(args.comfi_root).resolve()
 
     total = 0
     ok = 0
