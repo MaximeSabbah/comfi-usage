@@ -21,7 +21,7 @@ def get_marker_array(mks_list, marker_name):
 # === Load data ===
 subject = "Alessandro"
 task = "robot_welding"
-path_to_jcp_mocap= f"./data/{subject}/mocap/{task}/joint_center_positions_test.csv"
+path_to_jcp_mocap= f"./data/{subject}/mocap/{task}/joint_center_positions_test.csv" #data from mocap and hpe should be with same unit
 df_mocap = pd.read_csv(path_to_jcp_mocap)
 mks_mocap, start_sample_mocap = read_mks_data(df_mocap, start_sample=0)
 
@@ -32,7 +32,7 @@ mks_hpe, start_sample_hpe = read_mks_data(df_hpe, start_sample=0)
 # print(mks_mocap)
 print(mks_mocap[0])
 
-#take common markers
+#take only common markers
 common_mks = sorted(set(start_sample_mocap.keys()) & set(start_sample_mocap.keys()))
 print("Common markers:", common_mks)
 

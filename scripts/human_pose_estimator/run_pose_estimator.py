@@ -3,19 +3,19 @@ import numpy as np
 from rtmlib import Wholebody, draw_skeleton, Custom, PoseTracker
 from functools import partial
 import csv
+import os
 
-cam_id = 6
+# ---------------- Config ---------------- #
+cam_ids = [0, 4, 6]
 task = 'robot_welding'
 subject = 'Alessandro'
-
-video_path = f'./data/{subject}/videos/{task}/camera_{cam_id}.mp4'
-output_path = f'./data/{subject}/videos/{task}/keypoints_video_{cam_id}.avi'
-csv_output = f'./data/{subject}/res_hpe/{task}/keypoints_cam{cam_id}.csv'
 
 device = 'cpu'  # 'cpu', 'cuda'
 backend = 'onnxruntime'
 openpose_skeleton = False
-
+show_realtime = True   # <- set to False if you don’t want live display
+# ----------------rtmlib-------------------- #
+#refer to rtmlib repo for more details
 custom = partial(
     Custom,
     to_openpose=openpose_skeleton,
@@ -32,73 +32,86 @@ custom = partial(
 pose_tracker = PoseTracker(
     custom,
     det_frequency=10,
-    tracking = False,
-    tracking_thr = 0.1,
+    tracking=False,
+    tracking_thr=0.1,
     to_openpose=openpose_skeleton,
     backend=backend,
     device=device
 )
 
-cap = cv2.VideoCapture(video_path)
-if not cap.isOpened():
-    print("Erreur : Impossible d'ouvrir la vidéo.")
-    exit()
+for cam_id in cam_ids:
+    print(f"\n=== Processing camera {cam_id} ===")
 
-fps = int(cap.get(cv2.CAP_PROP_FPS))
-frame_width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-fourcc = cv2.VideoWriter_fourcc(*'MJPG')  # 'MJPG', 'MP4V', etc.
-out = cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height))
+    video_path = f'./data/{subject}/videos/{task}/camera_{cam_id}.mp4'
+    output_path = f'./data/{subject}/videos/{task}/keypoints_video_{cam_id}.avi'
+    csv_output = f'./data/{subject}/res_hpe/{task}/keypoints_cam{cam_id}.csv'
 
-frame_id = 0
-person_index = None  # stock first person index
+    if not os.path.exists(video_path):
+        print(f"⚠️  Video not found: {video_path}")
+        continue
 
-with open(csv_output, mode='w', newline='') as f:
-    writer = csv.writer(f)
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        print(f"Error: Could not open {video_path}")
+        continue
 
-        keypoints, scores = pose_tracker(frame)
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    frame_width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    out = cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height))
 
-        if keypoints.shape[0] > 0:
-            # we took first person detected in first frame
-            if frame_id == 0:
-                person_index = 0  
+    frame_id = 0
+    person_index = None  # keep the first detected person
 
-            # we keep only the first one detected
-            if person_index is not None and person_index < keypoints.shape[0]:
-                keypoints = keypoints[person_index:person_index+1]
-                scores = scores[person_index:person_index+1]
-            else:
-                # ignore
-                keypoints = None
-                scores = None
+    with open(csv_output, mode='w', newline='') as f:
+        writer = csv.writer(f)
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-            if keypoints is not None:
-                frame_with_skeleton = draw_skeleton(frame.copy(), keypoints, scores, kpt_thr=0.5)
+            keypoints, scores = pose_tracker(frame)
+
+            if keypoints.shape[0] > 0:
+                if frame_id == 0:
+                    person_index = 0  # choose the first person
+
+                if person_index is not None and person_index < keypoints.shape[0]:
+                    keypoints = keypoints[person_index:person_index+1]
+                    scores = scores[person_index:person_index+1]
+                else:
+                    keypoints, scores = None, None
+
+                if keypoints is not None:
+                    frame_with_skeleton = draw_skeleton(
+                        frame.copy(), keypoints, scores, kpt_thr=0.5
+                    )
+                else:
+                    frame_with_skeleton = frame.copy()
             else:
                 frame_with_skeleton = frame.copy()
-        else:
-            frame_with_skeleton = frame.copy()
 
-        out.write(frame_with_skeleton)
-        print(f"Frame #{frame_id}")
-        frame_id += 1
+            out.write(frame_with_skeleton)
+            print(f"[cam {cam_id}] Frame #{frame_id}")
+            frame_id += 1
 
-        
-        if keypoints is not None and scores is not None:
-            keypoints_flat = keypoints.flatten().tolist() 
-            scores_flat = scores.flatten().tolist()       
-            scores_mean = [np.mean(scores_flat)]
-            writer.writerow(scores_mean + keypoints_flat)
+            if keypoints is not None and scores is not None:
+                keypoints_flat = keypoints.flatten().tolist()
+                scores_flat = scores.flatten().tolist()
+                scores_mean = [np.mean(scores_flat)]
+                writer.writerow(scores_mean + keypoints_flat)
 
-        # to display in realtime
-        # cv2.imshow('Skeleton Video', frame_with_skeleton)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-	
-cap.release()
-out.release()
-cv2.destroyAllWindows()
+            # Optional real-time display
+            if show_realtime:
+                cv2.imshow(f'Skeleton Video - cam {cam_id}', frame_with_skeleton)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+
+    cap.release()
+    out.release()
+
+if show_realtime:
+    cv2.destroyAllWindows()
+
+print("\n✅ Processing finished for all cameras")

@@ -285,7 +285,6 @@ def load_force_data(csv_file_path, max_pf=5):
     for sensor_id in range(1, max_pf + 1):
         sensor_name = f"Sensix_{sensor_id}"
 
-        # Vérifie que toutes les colonnes de ce capteur existent
         required_cols = [f"{sensor_name}_{axis}" for axis in ["Fx[N]","Fy[N]","Fz[N]","Mx[N.mm]","My[N.mm]","Mz[N.mm]"]]
         if all(col in df.columns for col in required_cols):
             force_data[sensor_id] = {
@@ -330,7 +329,7 @@ def kabsch_global(P_cam_seq, P_mocap_seq, weights=None):
 
     U, S, Vt = np.linalg.svd(H)
     R = U @ Vt
-    if np.linalg.det(R) < 0:  # corrige réflexion
+    if np.linalg.det(R) < 0: 
         U[:, -1] *= -1
         R = U @ Vt
     t = Yc - R @ Xc
@@ -368,5 +367,5 @@ def compute_mpjpe(P_pred, P_gt):
     """
     assert P_pred.shape == P_gt.shape
     errors = np.linalg.norm(P_pred - P_gt, axis=2)  # (T,N) distance per joint per frame
-    mpjpe = errors.mean()                            # moyenne sur tous les joints et frames
+    mpjpe = errors.mean()                            
     return mpjpe

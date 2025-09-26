@@ -48,7 +48,7 @@ for subject in subjects:
         frames = df["Frame"] if "Frame" in df.columns else range(len(df))
         mks_names = sorted(set(col.rsplit("_", 1)[0] for col in df.columns if "_x" in col))
 
-        mks_dict, start_sample_dict = read_mks_data(df, start_sample=0,converter = 1000.0)
+        mks_dict, start_sample_dict = read_mks_data(df, start_sample=0,converter = 1000.0) #check data unit, if it is in m converter=1.0, if it is in mm converter=1000.0
 
         jcp_per_frame = []
         for frame_id in range(len(mks_dict)):

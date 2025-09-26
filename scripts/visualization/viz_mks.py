@@ -124,7 +124,6 @@ def main():
         time.sleep(0.60*(1/args.freq))
 
     print(f"[OK] Visualized {stop - start} frames | ID {args.subject_id} | Task {args.task} | {args.freq} Hz")
-    print(f"[SRC] {csv_path}")
 
 if __name__ == "__main__":
     main()
