@@ -96,8 +96,8 @@ def get_virtual_pelvis_pose(mks_positions):
     pose matrix and ensures it is orthogonal.
     Parameters:
     mks_positions (dict): A dictionary containing the positions of the motion capture markers.
-                                The keys can be either 'r.PSIS_study', 'L.PSIS_study', 'r.ASIS_study', 
-                                'L.ASIS_study', or 'RIPS', 'LIPS', 'RIAS', 'LIAS'.
+                                The keys can be either 'RPSI', 'LPSI', 'RASI', 
+                                'LASI', or 'RIPS', 'LIPS', 'RIAS', 'LIAS'.
     Returns:
     numpy.ndarray: A 4x4 pose matrix representing the pelvis pose.
     """
@@ -107,15 +107,15 @@ def get_virtual_pelvis_pose(mks_positions):
     center_PSIS = []
     center_ASIS = []
 
-    center_PSIS = (mks_positions['r.PSIS_study'] + mks_positions['L.PSIS_study']).reshape(3,1)/2.0
-    center_ASIS = (mks_positions['r.ASIS_study'] + mks_positions['L.ASIS_study']).reshape(3,1)/2.0
-    center = (mks_positions['r.ASIS_study'] +
-                mks_positions['L.ASIS_study'] +
-                mks_positions['r.PSIS_study'] +
-                mks_positions['L.PSIS_study'] )/4.0
+    center_PSIS = (mks_positions['RPSI'] + mks_positions['LPSI']).reshape(3,1)/2.0
+    center_ASIS = (mks_positions['RASI'] + mks_positions['LASI']).reshape(3,1)/2.0
+    center = (mks_positions['RASI'] +
+                mks_positions['LASI'] +
+                mks_positions['RPSI'] +
+                mks_positions['LPSI'] )/4.0
     X = center_ASIS - center_PSIS
     X = X/np.linalg.norm(X)
-    Z = mks_positions['r.ASIS_study'] - mks_positions['L.ASIS_study']
+    Z = mks_positions['RASI'] - mks_positions['LASI']
     Z = Z/np.linalg.norm(Z)
     Y = np.cross(Z, X, axis=0)
     Z = np.cross(X, Y, axis=0)
@@ -136,8 +136,8 @@ def get_pelvis_pose(mks_positions, gender = 'male'):
     pose matrix and ensures it is orthogonal.
     Parameters:
     mocap_mks_positions (dict): A dictionary containing the positions of the motion capture markers.
-                                The keys can be either 'r.PSIS_study', 'L.PSIS_study', 'r.ASIS_study', 
-                                'L.ASIS_study', or 'RIPS', 'LIPS', 'RIAS', 'LIAS'.
+                                The keys can be either 'RPSI', 'LPSI', 'RASI', 
+                                'LASI', or 'RIPS', 'LIPS', 'RIAS', 'LIAS'.
     Returns:
     numpy.ndarray: A 4x4 pose matrix representing the pelvis pose.
     """
@@ -158,16 +158,16 @@ def get_pelvis_pose(mks_positions, gender = 'male'):
     center_left_ASIS_PSIS = []
     LJC=np.zeros((3,1))
 
-    dist_rPL_lPL = np.linalg.norm(mks_positions["r.ASIS_study"]-mks_positions["L.ASIS_study"])
+    dist_rPL_lPL = np.linalg.norm(mks_positions["RASI"]-mks_positions["LASI"])
     virtual_pelvis_pose = get_virtual_pelvis_pose(mks_positions)
     LJC = virtual_pelvis_pose[:3, 3].reshape(3,1)
 
 
-    center_PSIS = (mks_positions['r.PSIS_study'] + mks_positions['L.PSIS_study']).reshape(3,1)/2.0
-    center_ASIS = (mks_positions['r.ASIS_study'] + mks_positions['L.ASIS_study']).reshape(3,1)/2.0
+    center_PSIS = (mks_positions['RPSI'] + mks_positions['LPSI']).reshape(3,1)/2.0
+    center_ASIS = (mks_positions['RASI'] + mks_positions['LASI']).reshape(3,1)/2.0
     
-    center_right_ASIS_PSIS = (mks_positions['r.PSIS_study'] + mks_positions['r.ASIS_study']).reshape(3,1)/2.0
-    center_left_ASIS_PSIS = (mks_positions['L.PSIS_study'] + mks_positions['L.ASIS_study']).reshape(3,1)/2.0
+    center_right_ASIS_PSIS = (mks_positions['RPSI'] + mks_positions['RASI']).reshape(3,1)/2.0
+    center_left_ASIS_PSIS = (mks_positions['LPSI'] + mks_positions['LASI']).reshape(3,1)/2.0
     
     offset_local = col_vector_3D(
                                 -ratio_x * dist_rPL_lPL,
@@ -178,7 +178,7 @@ def get_pelvis_pose(mks_positions, gender = 'male'):
  
     X = center_ASIS - center_PSIS
     X = X/np.linalg.norm(X)
-    # Z = mks_positions['r.ASIS_study'] - mks_positions['L.ASIS_study']
+    # Z = mks_positions['RASI'] - mks_positions['LASI']
     Z = center_right_ASIS_PSIS - center_left_ASIS_PSIS
     Z = Z/np.linalg.norm(Z)
     Y = np.cross(Z, X, axis=0)
@@ -202,7 +202,7 @@ def get_torso_pose(mks_positions):
     of specific markers.
     Parameters:
     mks_positions (dict): A dictionary containing the positions of motion capture markers.
-                                Expected keys are 'Neck', 'midHip', 'C7_study', 'CV7', 'SJN', 
+                                Expected keys are 'Neck', 'Mid_Hip', 'C7', 'CV7', 'SJN', 
                                 'HeadR', 'HeadL', 'RSAT', and 'LSAT'. Each key should map to a 
                                 numpy array of shape (3,).
     Returns:
@@ -212,15 +212,15 @@ def get_torso_pose(mks_positions):
     pose = np.eye(4,4)
     X, Y, Z, trunk_center = [], [], [], []
 
-    trunk_center = (mks_positions['r_shoulder_study'] + mks_positions['L_shoulder_study'])/2.0 
-    midhip = (mks_positions['r.ASIS_study'] +
-                mks_positions['L.ASIS_study'] +
-                mks_positions['r.PSIS_study'] +
-                mks_positions['L.PSIS_study'] )/4.0
+    trunk_center = (mks_positions['RSHO'] + mks_positions['LSHO'])/2.0 
+    Mid_Hip = (mks_positions['RASI'] +
+                mks_positions['LASI'] +
+                mks_positions['RPSI'] +
+                mks_positions['LPSI'] )/4.0
 
-    Y = (trunk_center - midhip).reshape(3,1)
+    Y = (trunk_center - Mid_Hip).reshape(3,1)
     Y = Y/np.linalg.norm(Y)
-    X = (trunk_center - mks_positions['C7_study']).reshape(3,1)
+    X = (trunk_center - mks_positions['C7']).reshape(3,1)
     X = X/np.linalg.norm(X)
    
     Z = np.cross(X, Y, axis=0)
@@ -292,7 +292,7 @@ def compute_shoulder(SHO, C7, CLAV, side='right'):
     ])
 
 
-def compute_joint_centers_from_mks(markers, *, gender="male"):
+def compute_joint_centers_from_mks(markers):
     """
     Compute joint center positions and segment lengths from marker positions.
 
@@ -327,7 +327,7 @@ def compute_joint_centers_from_mks(markers, *, gender="male"):
     pelvis_position = as_col(pelvis_pose[:3, 3])
     pelvis_rotation = pelvis_pose[:3, :3]
 
-    bi_acromial_dist = np.linalg.norm(markers['L_shoulder_study'] - markers['r_shoulder_study'])
+    bi_acromial_dist = np.linalg.norm(markers['LSHO'] - markers['RSHO'])
     torso_pose = get_torso_pose(markers)
 
     # ---- Transform all markers into pelvis (local) frame (do NOT mutate input) ----
@@ -338,79 +338,79 @@ def compute_joint_centers_from_mks(markers, *, gender="male"):
 
     # ---- Shoulders & Neck ----
     try:
-        jcp_g["RShoulder"]= markers['r_shoulder_study'].reshape(3,1) + (torso_pose[:3, :3].reshape(3,3)) @ col_vector_3D(0.0, -0.17*bi_acromial_dist, 0.0)
-        jcp_g["LShoulder"] = markers['L_shoulder_study'].reshape(3,1) + (torso_pose[:3, :3].reshape(3,3)) @ col_vector_3D(0.0, -0.17*bi_acromial_dist, 0.0)
+        jcp_g["Right_Shoulder"]= markers['RSHO'].reshape(3,1) + (torso_pose[:3, :3].reshape(3,3)) @ col_vector_3D(0.0, -0.17*bi_acromial_dist, 0.0)
+        jcp_g["Left_Shoulder"] = markers['LSHO'].reshape(3,1) + (torso_pose[:3, :3].reshape(3,3)) @ col_vector_3D(0.0, -0.17*bi_acromial_dist, 0.0)
 
-        jcp["RShoulder"] = transform_to_local_frame(jcp_g["RShoulder"], pelvis_position, pelvis_rotation)
-        jcp["LShoulder"] = transform_to_local_frame(jcp_g["LShoulder"], pelvis_position, pelvis_rotation)
-        jcp["Neck"] = compute_uptrunk(markers_local["C7_study"], markers_local["SJN"])
+        jcp["Right_Shoulder"] = transform_to_local_frame(jcp_g["Right_Shoulder"], pelvis_position, pelvis_rotation)
+        jcp["Left_Shoulder"] = transform_to_local_frame(jcp_g["Left_Shoulder"], pelvis_position, pelvis_rotation)
+        jcp["Neck"] = compute_uptrunk(markers_local["C7"], markers_local["SJN"])
     except KeyError as e:
         pass
 
     # ---- Elbows ----
     try:
-        jcp["RElbow"] = midpoint(markers_local["r_melbow_study"], markers_local["r_lelbow_study"])
-        jcp["LElbow"] = midpoint(markers_local["L_melbow_study"], markers_local["L_lelbow_study"])
+        jcp["Right_Elbow"] = midpoint(markers_local["RMELB"], markers_local["RELB"])
+        jcp["Left_Elbow"] = midpoint(markers_local["LMELB"], markers_local["LELB"])
 
     except KeyError:
         pass
 
     # ---- Wrists ----
     try:
-        jcp["RWrist"] = midpoint(markers_local["r_mwrist_study"], markers_local["r_lwrist_study"])
-        jcp["LWrist"] = midpoint(markers_local["L_mwrist_study"], markers_local["L_lwrist_study"])
+        jcp["Right_Wrist"] = midpoint(markers_local["RMWRI"], markers_local["RWRI"])
+        jcp["Left_Wrist"] = midpoint(markers_local["LMWRI"], markers_local["LWRI"])
     except KeyError:
         pass
 
     # ---- Pelvis & Hips ----
     try:
-        R_ASIS = markers_local["r.ASIS_study"]
-        L_ASIS = markers_local["L.ASIS_study"]
-        R_PSIS = markers_local["r.PSIS_study"]
-        L_PSIS = markers_local["L.PSIS_study"]
+        R_ASIS = markers_local["RASI"]
+        L_ASIS = markers_local["LASI"]
+        R_PSIS = markers_local["RPSI"]
+        L_PSIS = markers_local["LPSI"]
 
-        jcp["RHip"] = compute_hip_joint_center(L_ASIS, R_ASIS, L_PSIS, R_PSIS,
-                                               markers_local["r_knee_study"],
-                                               markers_local["r_ankle_study"],
+        jcp["Right_Hip"] = compute_hip_joint_center(L_ASIS, R_ASIS, L_PSIS, R_PSIS,
+                                               markers_local["RKNE"],
+                                               markers_local["RANK"],
                                                side="right")
-        jcp["LHip"] = compute_hip_joint_center(L_ASIS, R_ASIS, L_PSIS, R_PSIS,
-                                               markers_local["L_knee_study"],
-                                               markers_local["L_ankle_study"],
+        jcp["Left_Hip"] = compute_hip_joint_center(L_ASIS, R_ASIS, L_PSIS, R_PSIS,
+                                               markers_local["LKNE"],
+                                               markers_local["LANK"],
                                                side="left")
-        jcp["midHip"] = midpoint(jcp["RHip"], jcp["LHip"])
+        jcp["Mid_Hip"] = midpoint(jcp["Right_Hip"], jcp["Left_Hip"])
     except KeyError:
         pass
 
     # ---- Knees ----
     try:
-        jcp["RKnee"] = midpoint(markers_local["r_mknee_study"], markers_local["r_knee_study"])
-        jcp["LKnee"] = midpoint(markers_local["L_mknee_study"], markers_local["L_knee_study"])
+        jcp["Right_Knee"] = midpoint(markers_local["RMKNE"], markers_local["RKNE"])
+        jcp["Left_Knee"] = midpoint(markers_local["LMKNE"], markers_local["LKNE"])
     except KeyError:
         pass
 
     # ---- Ankles ----
     try:
-        jcp["RAnkle"] = midpoint(markers_local["r_mankle_study"], markers_local["r_ankle_study"])
-        jcp["LAnkle"] = midpoint(markers_local["L_mankle_study"], markers_local["L_ankle_study"])
+        jcp["Right_Ankle"] = midpoint(markers_local["RMANK"], markers_local["RANK"])
+        jcp["Left_Ankle"] = midpoint(markers_local["LMANK"], markers_local["LANK"])
     except KeyError:
         pass
 
     # ---- Feet / Toes ----
     try:
-        jcp["RHeel"] = markers_local["r_calc_study"]
-        jcp["LHeel"] = markers_local["L_calc_study"]
+        jcp["Right_Heel"] = markers_local["RHEE"]
+        jcp["Left_Heel"] = markers_local["LHEE"]
     except KeyError:
         pass
 
     try:
-        jcp["RBigToe"] = markers_local["r_toe_study"]
-        jcp["LBigToe"] = markers_local["L_toe_study"]
+        jcp["Right_Big_Toe"] = markers_local["RTOE"]
+        jcp["Left_Big_Toe"] = markers_local["LTOE"]
     except KeyError:
         pass
 
     try:
-        jcp["RSmallToe"] = markers_local["r_5meta_study"]
-        jcp["LSmallToe"] = markers_local["L_5meta_study"]
+        jcp["Right_Small_Toe"] = markers_local["R5MHD"]
+        jcp["Seft_Small_Toe"] = markers_local["L5MHD"]
     except KeyError:
         pass
 
