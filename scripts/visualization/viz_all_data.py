@@ -39,7 +39,7 @@ DS_TASKS = [
 
 TASKS_WITHOUT_FP = ["CircularWalking", "StraightWalking", "SideOverhead", "FrontOverhead"]
 
-TASKS_WITH_TABLE = ["Screwing","ScrewingSat","Hammering","HammeringSat","RobotPolishing","RobotWelding","Polishing","PolishingSat","Welding","WeldingSat"]
+TASKS_WITH_TABLE = ["RobotPolishing","RobotWelding"]
 
 URDF_DIR_DEFAULT   = Path("model/urdf")   # contains files like 4279_scaled.urdf
 MESHES_DIR_DEFAULT = Path("model")        # root for visuals/collisions
@@ -444,24 +444,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
- # #paths (adjust to your env)
-    # paths = Paths(
-    #     mks_csv = "./data/Alessandro/mocap/robot_welding/mocap_downsampled_to_40hz.csv",
-    #     q_ref_csv = "./data/Alessandro/mocap/robot_welding/q_mocap.csv",
-    #     robot_csv = "./data/Alessandro/robot/Alessandro_robot_welding.csv",
-    #     cam0_ts_csv = "./data/Alessandro/camera_0_timestamps.csv",
-    #     urdf_path = "./model/urdf/4279_scaled.urdf",
-    #     urdf_meshes_path =os.path.abspath("model"),
-    #     robot_base_yaml = "./data/Alessandro/robot/robot_base_pose.yaml",
-    #     jcp_mocap = "./data/Alessandro/mocap/robot_welding/joint_center_positions.csv",
-    #     jcp_hpe = "./data/Alessandro/res_hpe/robot_welding/3d_keypoints.csv",
-    #     force_data = "./data/Alessandro/pf/robot_welding/robot_welding_devices_aligned.csv",
-    #     soder_paths = {
-    #         "0": "./data/Alessandro/config/soder_0.txt",
-    #         "2": "./data/Alessandro/config/soder_2.txt",
-    #         "4": "./data/Alessandro/config/soder_4.txt",
-    #         "6": "./data/Alessandro/config/soder_6.txt",
-    #     }
-    # )

@@ -246,7 +246,8 @@ def display_force_meshcat(viz, phi, M_se3, name="arrow"):
     import meshcat.transformations as tf
     
     M_se3_temp = M_se3.copy()
-    color = 0x0000ff
+    # color = 0x0000ff
+    color = 0xff8000 
     radius = 0.01
     
     phi_transformed = phi.se3Action(M_se3)
