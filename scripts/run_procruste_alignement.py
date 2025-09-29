@@ -91,12 +91,12 @@ def process_one(comfi_root, sid, task, nb_cams):
         P_hpe_seq[:, i, :]   = np.stack([frame[mk] for frame in mks_hpe], axis=0)
 
     R, t, rms = kabsch_global(P_hpe_seq, P_mocap_seq)
-    print("RMS alignment error:", rms)
+    print("RMS alignment error (mm):", rms)
 
     P_hpe_seq_aligned = (P_hpe_seq @ R.T) + t  # (T,N,3)
     plot_aligned_markers(P_mocap_seq, P_hpe_seq_aligned, common_mks)
     mpjpe = compute_mpjpe(P_hpe_seq_aligned, P_mocap_seq)
-    print("MPJPE (m):", mpjpe)
+    print("MPJPE (mm):", mpjpe)
 
     T, N, _ = P_hpe_seq_aligned.shape
     df_hpe_aligned = pd.DataFrame(P_hpe_seq_aligned.reshape(T, 3*N),

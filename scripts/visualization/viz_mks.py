@@ -10,7 +10,7 @@ import time
 
 # ---- local imports (assuming this file is in scripts/ or similar) ----
 THIS_DIR = Path(__file__).resolve().parent
-PARENT_DIR = THIS_DIR.parent
+PARENT_DIR = THIS_DIR.parent.parent
 if str(PARENT_DIR) not in sys.path:
     sys.path.append(str(PARENT_DIR))
 from utils.utils import read_mks_data

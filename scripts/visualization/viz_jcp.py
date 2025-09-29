@@ -10,7 +10,8 @@ import time
 
 # ---- local imports (assuming this file is in scripts/ or similar) ----
 THIS_DIR = Path(__file__).resolve().parent
-PARENT_DIR = THIS_DIR.parent
+PARENT_DIR = THIS_DIR.parent.parent
+print(PARENT_DIR)
 if str(PARENT_DIR) not in sys.path:
     sys.path.append(str(PARENT_DIR))
 from utils.utils import read_mks_data
@@ -30,21 +31,44 @@ DS_TASKS = [
 
 def parse_args():
     p = argparse.ArgumentParser(
-        description="Visualize COMFI joint_center_positions.csv in Meshcat."
+        description="Visualize COMFI joint_center_positions from either mocap or HPE in Meshcat."
     )
+
+    p.add_argument("--mode", choices=["mocap", "hpe"], required=True,
+                        help="Choose source type")
+    
     p.add_argument("--id", dest="subject_id", required=True,
                    help="ID (e.g., 1012)")
     p.add_argument("--task", required=True,
                    help="Task name (e.g., RobotWelding)")
-    p.add_argument("--comfi-root", required=True,
-                   help="Path to COMFI dataset root.")
     p.add_argument("--freq", type=int, choices=[40, 100], required=True,
                    help="Sampling frequency: 40 (aligned) or 100 (raw).")
     p.add_argument("--start", type=int, default=0,
                    help="Start frame index (inclusive). Default: 0")
     p.add_argument("--stop", type=int, default=None,
                    help="Stop frame index (exclusive). Default: None (till end)")
+    
+
+    p.add_argument("--comfi-root", help="Path to comfi root directory (only for jcp_mocap)")
+    p.add_argument("--nb-cams", type=int, help="Number of cameras (only for jcp_hpe)")
+
+    
+    args = p.parse_args()
+
+    if args.mode == "jcp_mocap":
+        if not args.comfi_root:
+            p.error("--comfi-root is required when --mode jcp_mocap")
+        if args.nb_cams is not None:
+            p.error("--nb-cams is not allowed when --mode jcp_mocap")
+
+    if args.mode == "jcp_hpe":
+        if args.comfi_root is not None:
+            p.error("--comfi-root is not allowed when --mode jcp_hpe")
+        if args.nb_cams is None:
+            p.error("--nb-cams is required when --mode jcp_hpe")
+    
     return p.parse_args()
+
 
 def main():
     args = parse_args()
@@ -58,8 +82,13 @@ def main():
 
     split_folder = "aligned" if args.freq == 40 else "raw"
 
-    comfi_root = Path(args.comfi_root)
-    csv_path = comfi_root / "mocap" / split_folder / args.subject_id / args.task / "joint_center_positions.csv"
+    
+    if args.mode == "mocap": 
+        comfi_root = Path(args.comfi_root)
+        csv_path = comfi_root / "mocap" / split_folder / args.subject_id / args.task / "joint_center_positions.csv"
+    else : 
+        csv_path = Path("output").resolve() / "res_hpe" / args.subject_id / args.task  / f"3d_keypoints_{args.nb_cams}cams.csv"
+
     if not csv_path.exists():
         raise FileNotFoundError(f"CSV not found: the task {args.task} is not available for id {args.subject_id}")
 
