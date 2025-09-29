@@ -20,22 +20,22 @@ source comfi_env/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
-**Usage**
+### Usage
 This repository provides scripts for processing and visualizing COMFI dataset data.
 By default, Meshcat opens a local server (usually at http://127.0.0.1:7000) to stream the visualization in your browser.
 
-1.**Human pose estimation (HPE)**
+1. **Human pose estimation (HPE)**
 
 Run the RTMlib pose estimator (YOLOX + RTMPose-M with 26 keypoints):
 ```bash
 python run_pose_estimator.py --id 1012 --task RobotWelding --comfi-root /path/to/COMFI
 ```
-2.**Triangulation and visualization**
+2. **Triangulation and visualization**
 Triangulate keypoints from multiple camera views:
 ```bash
 python run_triangulation.py --id 4279 --task RobotWelding --nb-cams 4
 ```
-**Visualize triangulated data:**
+2.1 **Visualize triangulated data:**
 ```bash
 python scripts/visualization/viz_jcp.py \
     --mode hpe \
@@ -46,7 +46,7 @@ python scripts/visualization/viz_jcp.py \
     --start 0 \
     --stop 500
 ```
-3.**Visualize mocap markers + JCP**
+3. **Visualize mocap markers + JCP**
 ```bash
 python viz_mks.py \
     --id 1012 \
@@ -58,10 +58,11 @@ python viz_mks.py \
     --start 100 \
     --stop 500
 ```
+4. **Visualize all_data**
 ```bash
 python viz_all_data.....
 ```
-4.**Extract JCP from mocap markers (using our markerset):**
+5. **Extract JCP from mocap markers (using our markerset):**
 ```bash
 python get_jcp_from_mocap_markers.py \
     --id 1012 \
@@ -71,7 +72,7 @@ python get_jcp_from_mocap_markers.py \
     --mkset est
 
 ```
-5.**Alignment**
+6. **Alignment**
 ```bash
 python scripts/run_procruste_alignement.py \
     --id 4279 \
