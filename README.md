@@ -72,7 +72,7 @@ python get_jcp_from_mocap_markers.py \
     --mkset est
 
 ```
-6. **Alignment**
+6. **Alignment using the Kabsch algorithm**
 ```bash
 python scripts/run_procruste_alignement.py \
     --id 4279 \
