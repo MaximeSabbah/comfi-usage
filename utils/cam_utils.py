@@ -5,7 +5,7 @@ import cv2 as cv
 import yaml
 from utils.utils import load_transformation
 import pinocchio as pin 
-
+from utils.linear_algebra_utils import transform_to_local_frame
 def rt_to_homogeneous(R, T):
     """Convert (R, T) to a 4x4 homogeneous transformation matrix."""
     T = T.reshape(3,)
@@ -197,45 +197,96 @@ def load_cam_pose_rpy(filename):
     
     return euler, translation_vector
 
+def save_cam_to_cam_params(mtx1, dist1, mtx2, dist2, R, T, rmse, path):
+    """
+    Save stereo camera calibration parameters to a file.
+    Args:
+        mtx1 (numpy.ndarray): Camera matrix for the first camera.
+        dist1 (numpy.ndarray): Distortion coefficients for the first camera.
+        mtx2 (numpy.ndarray): Camera matrix for the second camera.
+        dist2 (numpy.ndarray): Distortion coefficients for the second camera.
+        R (numpy.ndarray): Rotation matrix between the two cameras.
+        T (numpy.ndarray): Translation vector between the two cameras.
+        rmse (float): Root Mean Square Error of the calibration.
+        path (str): Path to the file where the parameters will be saved.
+    Returns:
+        None
+    """
+    cv_file = cv.FileStorage(path, cv.FILE_STORAGE_WRITE)
+    cv_file.write('K1', mtx1)
+    cv_file.write('D1', dist1)
+    cv_file.write('K2', mtx2)
+    cv_file.write('D2', dist2)
+    cv_file.write('R', R)
+    cv_file.write('T', T)
+    cv_file.write('rmse', rmse)
+    # note you *release* you don't close() a FileStorage object
+    cv_file.release()
 
-def load_camera_parameters(intrinsics_dir, extrinsics_dir, camera_ids):
+
+def compute_cam2cam_from_soder(extrinsics_dir, cam_ref, cam_id):
+    """
+    Compute extrinsics of cam_id relative to cam_ref from soder.txt.
+    """
+    print(cam_ref)
+    print(cam_id)
+    # Load mocap-to-camera extrinsics
+    R_ref, t_ref, _, _ = load_transformation(os.path.join(extrinsics_dir, f"cam_to_world/camera_{cam_ref}/soder.txt"))
+    R_cam, t_cam, _, _ = load_transformation(os.path.join(extrinsics_dir, f"cam_to_world/camera_{cam_id}/soder.txt"))
+
+    # Compute relative transformation (cam_id in cam_ref frame)
+    R_rel = np.transpose(R_cam)@R_ref
+    t_rel = transform_to_local_frame(t_ref, t_cam, R_cam)
+    
+    return R_rel, t_rel
+
+
+def load_camera_parameters(intrinsics_dir, extrinsics_dir, camera_ids, recompute_if_missing=True):
     """
     Load intrinsic and extrinsic camera parameters for multiple cameras.
-    
+    If extrinsics are missing, recompute them from mocap calibration (soder.txt).
+
     Args:
-        config_path (str): Path to the configuration directory
-        camera_ids (list, optional): List of camera IDs to load. 
-                                   If None, defaults to [0, 2] for 2-camera setup.
-                                   For 4-camera setup, use [0, 2, 4, 6].
-    
+        intrinsics_dir (str): Path to intrinsics directory
+        extrinsics_dir (str): Path to extrinsics directory
+        camera_ids (list): List of camera IDs to load
+        recompute_if_missing (bool): If True, recompute missing extrinsics
+
     Returns:
         Camera parameters object from get_camera_params()
     """
 
-    # Load intrinsic parameters for all cameras
-    Ks = []
-    Ds = []
+    # Load intrinsics
+    Ks, Ds = [], []
     for cam_id in camera_ids:
         K, D = load_cam_params(os.path.join(intrinsics_dir, f"camera_{cam_id}_intrinsics.yaml"))
         Ks.append(K)
         Ds.append(D)
-    
-    # Load extrinsic parameters (transformations from camera 0 to other cameras)
-    Rs = [None]  # First camera (reference) has no rotation
-    Ts = [None]  # First camera (reference) has no translation
 
-    R_first, T_first, _, _ = load_transformation(os.path.join(extrinsics_dir,f"cam_to_world/camera_{camera_ids[0]}/soder.txt"))
-    SE3_first = pin.SE3(R_first,T_first)
+    # Reference camera (first one in list)
+    Rs = [None]
+    Ts = [None]
+    cam_ref = camera_ids[0]
 
-    for i, cam_id in enumerate(camera_ids[1:], 1):  # Skip first camera (reference)
-        R, T, _, _ = load_transformation(os.path.join(extrinsics_dir,f"cam_to_world/camera_{cam_id}/soder.txt"))
-        SE3 = pin.SE3(R,T)
-        SE3_rel = SE3_first.inverse()*SE3
-        R_rel = SE3_rel.rotation
-        T_rel = SE3_rel.translation
+    # Make sure we load its SE3 (not really used but consistent)
+    R_ref, T_ref, _, _ = load_transformation(os.path.join(extrinsics_dir, f"cam_to_world/camera_{cam_ref}/soder.txt"))
+    SE3_ref = pin.SE3(R_ref, T_ref)
+
+    # Load extrinsics for other cameras
+    for cam_id in camera_ids[1:]:
+        cam2cam_file = os.path.join(extrinsics_dir, f"c{cam_ref}_to_c{cam_id}_params.yaml")
+
+        if not os.path.exists(cam2cam_file) and recompute_if_missing:
+            print(f"[INFO] Extrinsics {cam_ref}->{cam_id} not found, recomputing from soder.txt...")
+            R_rel, t_rel = compute_cam2cam_from_soder(extrinsics_dir, cam_ref, cam_id)
+            save_cam_to_cam_params(Ks[0], Ds[0], Ks[camera_ids.index(cam_id)], Ds[camera_ids.index(cam_id)], 
+                                   R_rel, t_rel, 0.0, cam2cam_file)
+        else:
+            R_rel, t_rel = load_cam_to_cam_params(cam2cam_file)
+
         Rs.append(R_rel)
-        Ts.append(T_rel)
-    
+        Ts.append(t_rel)
+
     return get_camera_params(Ks=Ks, Ds=Ds, Rs=Rs, Ts=Ts)
 
 

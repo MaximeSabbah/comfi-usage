@@ -120,8 +120,8 @@ def index_cameras_used(which_cam_used_list: list):
     return index_cameras_used
 
 def triangulate_points_adaptive(uvs, mtxs, dists, projections, scores: list, threshold: float):
-    num_frames = len(uvs[0])  # Nombre de frames, basé sur la première caméra
-    num_points = len(uvs[0][0])  # Nombre de points, basé sur la première frame de la première caméra
+    num_frames = len(uvs[0])  
+    num_points = len(uvs[0][0])  
     p3ds_frames = []
     keypoints_in_cam0_list = []
 
