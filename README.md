@@ -5,6 +5,7 @@ Data from Zenodo should be downloaded and organized as shown in the following di
 ![COMFI Organization](images/comfi_organisation.pdf)
 
 # comfi-usage
+
 Scripts to use and showcase the data from the COMFI dataset
 
 ## Installation
@@ -27,6 +28,7 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 ### Usage
+
 This repository provides scripts for processing and visualizing COMFI dataset data. Visualizations are performed using Meshcat, which by default launches a local server (typically at http://127.0.0.1:7000
 ) to stream the visualizations directly in your browser.
 
@@ -43,6 +45,7 @@ python run_pose_estimator.py \
      --comfi-root /path/to/COMFI
 ```
 2. **Triangulation and visualization**
+
 Triangulate keypoints from multiple camera views (can be done with any set of cameras, minimum 2). The triangulation results are saved in the output folder.
 ```bash
 python run_triangulation.py \
@@ -74,6 +77,7 @@ python viz_mks.py \
     --stop 500
 ```
 4. **Visualize all_data**
+
 Visualize multimodal data and animate motion capture sequences, including reference 3D marker positions, JCP, resultant force vectors, and the poses of the world, cameras, force plates, and robot frames. The animation shows both the biomechanical model, built from the scaled URDF, and the robot’s motion. Optionally, JCP from HPE or aligned data can also be visualized if --with-jcp-hpe is set to true.
 
 **Note:** Robot and force data are not available for all tasks. Additionally, robot data is only aligned with videos at 40 Hz.
@@ -89,6 +93,7 @@ python scripts/visualization/viz_all_data.py \
 
 ```
 5. **Extract joint center positions from mocap markers (using our markerset)**
+
 The extracted JCP are saved in the output folder.
 ```bash
 python get_jcp_from_mocap_markers.py \
@@ -100,6 +105,7 @@ python get_jcp_from_mocap_markers.py \
 
 ```
 6. **Procruste alignment using the Kabsch algorithm**
+
 Performs a Procrustes alignment between JCP Mocap and JCP HPE. The newly aligned JCP are saved in the output folder.
 ```bash
 python scripts/run_procruste_alignement.py \
