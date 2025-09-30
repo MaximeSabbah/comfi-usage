@@ -37,12 +37,18 @@ All data can be visualized and processed by specifying the subject ID, task, and
 Run the RTMlib pose estimator (YOLOX + RTMPose-M with 26 keypoints), which can display the results in real time (this option can be disabled). At the end of the run, an output video with the skeleton overlay and a CSV file containing both the average score and the keypoints are saved in the output folder.
 
 ```bash
-python run_pose_estimator.py --id 1012 --task RobotWelding --comfi-root /path/to/COMFI
+python run_pose_estimator.py \
+     --id 1012 \
+     --task RobotWelding \
+     --comfi-root /path/to/COMFI
 ```
 2. **Triangulation and visualization**
 Triangulate keypoints from multiple camera views (can be done with any set of cameras, minimum 2). The triangulation results are saved in the output folder.
 ```bash
-python run_triangulation.py --id 4279 --task RobotWelding --nb-cams 4
+python run_triangulation.py \
+    --id 4279 \
+    --task RobotWelding \
+    --nb-cams 4
 ```
 2.1 **Visualize triangulated data:**
 ```bash
@@ -70,9 +76,16 @@ python viz_mks.py \
 4. **Visualize all_data**
 Visualize multimodal data and animate motion capture sequences, including reference 3D marker positions, JCP, resultant force vectors, and the poses of the world, cameras, force plates, and robot frames. The animation shows both the biomechanical model, built from the scaled URDF, and the robot’s motion. Optionally, JCP from HPE or aligned data can also be visualized if --with-jcp-hpe is set to true.
 
-**Note:** that robot and forces data are not available for all tasks. and robot data is only aligned with videos so 40hz. 
+**Note:** Robot and force data are not available for all tasks. Additionally, robot data is only aligned with videos at 40 Hz.
 ```bash
-python scripts/visualization/viz_all_data.py --id 4279 --task RobotWelding --comfi-root /home/kchalabi/Documents/THESE/dataset/comfi --freq 40 --start 100 --with-jcp-hpe --jcp-hpe-mode aligned
+python scripts/visualization/viz_all_data.py \
+     --id 4279 \
+     --task RobotWelding \
+     --comfi-root /path/to/COMFI \
+     --freq 40 \
+     --start 100 \
+     --with-jcp-hpe \ (optional)
+     --jcp-hpe-mode aligned
 
 ```
 5. **Extract joint center positions from mocap markers (using our markerset)**
