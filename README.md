@@ -69,6 +69,7 @@ python viz_mks.py \
 ```
 4. **Visualize all_data**
 Visualize multimodal data and animate motion capture sequences, including reference 3D marker positions, JCP, resultant force vectors, and the poses of the world, cameras, force plates, and robot frames. The animation shows both the biomechanical model, built from the scaled URDF, and the robot’s motion. Optionally, JCP from HPE or aligned data can also be visualized if --with-jcp-hpe is set to true.
+
 **Note:** that robot and forces data are not available for all tasks. and robot data is only aligned with videos so 40hz. 
 ```bash
 python scripts/visualization/viz_all_data.py --id 4279 --task RobotWelding --comfi-root /home/kchalabi/Documents/THESE/dataset/comfi --freq 40 --start 100 --with-jcp-hpe --jcp-hpe-mode aligned
