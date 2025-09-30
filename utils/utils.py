@@ -195,11 +195,16 @@ def load_all_data(paths, start_sample: int = 0, converter: float = 1000.0):
     jcp_dict, start_sample_jcp_dict = try_read_mks(jcp_raw, start_sample=start_sample, converter=converter)
     jcp_names = list(start_sample_jcp_dict.keys())
 
-    # Joint Center Positions (JCP) from hpe
-    # jcp_raw_hpe = pd.read_csv(paths.jcp_hpe)  
-    # jcp_dict_hpe, start_sample_jcp_dict_hpe = read_mks_data(jcp_raw_hpe, start_sample=start_sample, converter=1.0)
-    # jcp_hpe = [start_sample_jcp_dict_hpe[name] for name in start_sample_jcp_dict_hpe.keys()]
-    # jcp_names_hpe = [name + "_hpe" for name in start_sample_jcp_dict_hpe.keys()]
+    # JCP from hpe
+    jcp_dict_hpe = None
+    jcp_names_hpe = None
+    if hasattr(paths, "jcp_hpe") and paths.jcp_hpe is not None and paths.jcp_hpe.exists():
+        jcp_raw_hpe = pd.read_csv(paths.jcp_hpe)
+        jcp_dict_hpe, start_sample_jcp_dict_hpe = read_mks_data(
+            jcp_raw_hpe, start_sample=start_sample, converter=converter
+        )
+        jcp_hpe = [start_sample_jcp_dict_hpe[name] for name in start_sample_jcp_dict_hpe.keys()]
+        jcp_names_hpe = [name + "_hpe" for name in start_sample_jcp_dict_hpe.keys()]
 
     return {
         "mks_dict": mks_dict,
@@ -211,8 +216,8 @@ def load_all_data(paths, start_sample: int = 0, converter: float = 1000.0):
         "t_robot": t_robot,
         "jcp_mocap": jcp_dict,
         "jcp_names": jcp_names,
-        # "jcp_hpe": jcp_dict_hpe,
-        # "jcp_names_hpe": jcp_names_hpe,
+        "jcp_hpe": jcp_dict_hpe,
+        "jcp_names_hpe": jcp_names_hpe,
     }
 
 def compute_time_sync(t_cam: pd.DataFrame, t_robot: pd.DataFrame, tol_ms: int = 5):

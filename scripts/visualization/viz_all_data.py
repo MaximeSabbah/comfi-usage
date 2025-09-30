@@ -17,7 +17,7 @@ import time
 
 # ---- local imports (assuming this file is in scripts/ or similar) ----
 THIS_DIR = Path(__file__).resolve().parent
-PARENT_DIR = THIS_DIR.parent
+PARENT_DIR = THIS_DIR.parent.parent
 if str(PARENT_DIR) not in sys.path:
     sys.path.append(str(PARENT_DIR))
 
@@ -206,6 +206,16 @@ def parse_args():
                    help="Start frame index (inclusive). Default: 0")
     p.add_argument("--stop", type=int, default=None,
                    help="Stop frame index (exclusive). Default: None (till end)")
+    
+    p.add_argument("--with-jcp-hpe", action="store_true",
+                   help="Enable JCP HPE mode (default: False)")
+    p.add_argument("--jcp-hpe-mode", choices=["aligned", "2cams", "4cams","3cams"], default=None,
+                   help="Specify JCP HPE mode if --with-jcp-hpe is set.")
+    
+    args = p.parse_args()
+    if args.with_jcp_hpe and args.jcp_hpe_mode is None:
+        p.error("--jcp-hpe-mode is required when --with-jcp-hpe is set.")
+
     return p.parse_args()
 
 
@@ -387,7 +397,9 @@ def main():
                          f"Allowed: {', '.join(DS_TASKS)}")
 
     paths = Paths.from_args(args.comfi_root, args.subject_id, args.task, args.freq)
-
+    if args.with_jcp_hpe:
+        Paths.jcp_hpe = Path("output").resolve() / "res_hpe" / args.subject_id / args.task  / f"3d_keypoints_{args.jcp_hpe_mode}.csv"
+    
     #read all data
     payload = load_all_data(paths, start_sample=0, converter=1000.0)
     mks_dict = payload["mks_dict"]
@@ -398,6 +410,13 @@ def main():
     t_robot = payload["t_robot"]
     jcp_mocap = payload["jcp_mocap"]
     jcp_names = payload["jcp_names"]
+    jcp_hpe = None
+    jcp_names_hpe = None
+
+    if args.with_jcp_hpe:
+        jcp_hpe = payload.get("jcp_hpe", None)  
+        jcp_names_hpe = payload.get("jcp_names_hpe", None)
+    
 
     # transforms (robot base + cameras)
     if paths.robot_base_yaml is not None:
@@ -439,7 +458,7 @@ def main():
         sync = None
 
     #animation
-    animate(scene, jcp_mocap, jcp_names,mks_dict, mks_names, q_ref, q_robot, force_data,  
+    animate(scene, jcp_mocap, jcp_names,jcp_hpe,jcp_names_hpe, q_ref, q_robot, force_data,  
         (fp_dims, fp_centers), sync, paths.freq_anim, step=5, i0=0)
 
 if __name__ == "__main__":
