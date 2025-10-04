@@ -1,8 +1,10 @@
 ## Data Organization
 
-Data from Zenodo should be downloaded and organized as shown in the following diagram:
+Data from Zenodo (https://zenodo.org/records/17223909) should be downloaded and organized as shown in the following diagram:
 
 ![COMFI Organization](images/comfi_organisation.pdf)
+
+In particular, we recommend users to extract all the videos zip files into a same videos folder located into COMFI and to put the whole dataset into the present repository. 
 
 # comfi-usage
 
